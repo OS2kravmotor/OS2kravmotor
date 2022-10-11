@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'purchases')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<form class="form-horizontal" id="requirement-form" th:object="${purchase}">
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.id}"/>
+											<div class="col-sm-8">
+												<input th:value="${purchase.id}" class="form-control" readonly="readonly"/>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.title}" />
+											<div class="col-sm-8">
+												<input th:field="*{title}" class="form-control" readonly="readonly" />
+											</div>
+										</div>
+									</fieldset>
+			
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.description}"/>
+											<div class="col-sm-8">
+												<div th:text="*{description}" class="preformat form-control" style="height: auto !important;" readonly="readonly" />
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.email}" />
+											<div class="col-sm-8">
+												<input th:field="*{email}" class="form-control" readonly="readonly" />
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.deadline}" />
+											<div class="col-sm-8">
+												<input th:value="${purchase.endTime} ? ${#dates.format(purchase.endTime, 'yyyy/MM/dd - HH:mm')}" class="form-control" th:readonly="readonly"/>
+											</div>
+										</div>
+									</fieldset>
+			
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.status}"/>
+											<div class="col-sm-8">
+												<input th:value="#{__*{status.value}__}" class="form-control" readonly="readonly"/>
+												<div class="inline" th:if="${purchase.isDone() and !purchase.hasWinner()}">
+													<span th:text="#{html.purchase.list.no.winner}" ></span>
+													<i class="fa fa-exclamation-circle text-danger" aria-hidden="true"></i>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+			
+									<fieldset>
+										<div class="form-group">
+												<label class="col-sm-2 control-label" th:text="#{html.purchase.domain}"/>
+												<div class="col-sm-8">
+													<ul>
+														<li style="padding-left: 16px;" th:each="domain : *{domains}" th:value="${domain.id}" th:text="${domain.name}" ></li>
+													</ul>
+												</div>
+											</div>
+									</fieldset>
+									
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.requirementPriorityEnabled}"/>
+											<div class="col-sm-8">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input type="checkbox" name="requirementPriorityEnabled" th:checked="*{requirementPriorityEnabled}" disabled="disabled"/>
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+			
+									<div class="col-sm-12">
+										<ul role="tablist" class="nav nav-tabs">
+											<li role="presentation" class="active">
+												<a data-toggle="tab" href="#answers_tab" style="color: #515253" th:text="#{html.purchase.view.answers}"></a>
+											</li>
+											<li role="presentation">
+												<a data-toggle="tab" href="#requirements_tab" style="color: #515253" th:text="#{html.purchase.view.requirements}"></a>
+											</li>
+										</ul>
+	
+										<div class="tab-content">
+											<div id="answers_tab" class="tab-pane fade in active">
+												<table class="listTable table table-striped table-hover">
+													<thead>
+														<tr>
+															<th class="col-md-8" th:text="#{html.purchase.view.vendor}" />
+															<th class="col-md-3" th:text="#{html.purchase.view.answer.timestamp}" />
+															<th class="col-md-1" th:text="#{html.header.operation}" />
+														</tr>
+													</thead>
+				
+													<tbody>
+														<!--*** OLD VendorModel ***-->
+														<tr th:if="${oldVendorModel==true}" th:each="answer : ${answers}">
+															<td th:text="${answer.name}" />
+															<td th:text="${#dates.format(answer.timestamp, 'yyyy/MM/dd - HH:mm')}" />
+															<td>
+																<a th:if="${#strings.toString(purchase.status)}=='ARCHIVED' or ${#strings.toString(purchase.status)}=='COMPLETED'" style="color: #515253" th:href="@{/purchase/viewanswer/} + ${answer.id}"> <em class="fa fa-fw fa-search"></em></a>
+																<a th:if="${#strings.toString(purchase.status)}=='ARCHIVED' or ${#strings.toString(purchase.status)}=='COMPLETED'" style="color: #515253" th:href="@{/purchase/download/answers/pdf/} + ${answer.id}" target="_blank" ><em class="fa fa-fw fa-file-pdf-o" aria-hidden="true"></em></a>
+																<a th:if="${#strings.toString(purchase.status)}=='ARCHIVED' or ${#strings.toString(purchase.status)}=='COMPLETED'" style="color: #515253" th:href="@{/purchase/download/answers/excel/} + ${answer.id}" target="_blank" ><em class="fa fa-fw fa-file-excel-o" aria-hidden="true"></em></a>
+															</td>
+														</tr>
+														<!--*** NEW VendorModel ***-->
+														<tr th:if="${oldVendorModel==false}" th:each="purchaseAnswer : ${purchaseAnswers}">
+															<td th:text="${purchaseAnswer.vendorOrganization.domain}" />
+															<td th:text="${#dates.format(purchaseAnswer.created, 'yyyy/MM/dd - HH:mm')}" />
+															<td>
+																<a th:if="${#strings.toString(purchase.status)}=='ARCHIVED' or ${#strings.toString(purchase.status)}=='COMPLETED' or ${purchaseAnswer.doneAnswering}" style="color: #515253" th:href="@{/purchase/viewpurchaseanswer/} + ${purchaseAnswer.id}"> <em class="fa fa-fw fa-search"></em></a>
+																<a th:if="${#strings.toString(purchase.status)}=='ARCHIVED' or ${#strings.toString(purchase.status)}=='COMPLETED' or ${purchaseAnswer.doneAnswering}" style="color: #515253" th:href="@{/purchase/download/purchaseanswer/pdf/} + ${purchaseAnswer.id}" target="_blank" ><em class="fa fa-fw fa-file-pdf-o" aria-hidden="true"></em></a>
+																<a th:if="${#strings.toString(purchase.status)}=='ARCHIVED' or ${#strings.toString(purchase.status)}=='COMPLETED' or ${purchaseAnswer.doneAnswering}" style="color: #515253" th:href="@{/purchase/download/purchaseanswer/excel/} + ${purchaseAnswer.id}" target="_blank" ><em class="fa fa-fw fa-file-excel-o" aria-hidden="true"></em></a>
+															</td>
+														</tr>
+													</tbody>
+												</table>
+											</div>
+				
+											<div id="requirements_tab" class="tab-pane fade">
+												<table class="listTable table table-striped table-hover">
+													<thead>
+														<tr>
+															<th class="col-md-4" th:text="#{html.purchase.view.requirement.name}" />
+															<th class="col-md-8" th:text="#{html.purchase.view.requirement.description}" />
+														</tr>
+													</thead>
+				
+													<tbody>
+														<tr th:each="requirement : *{requirements}">
+															<td th:text="${requirement.name}" />
+															<td th:text="${requirement.description}" />
+														</tr>
+													</tbody>
+												</table>
+											</div>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+<div th:replace="fragment/footer :: footer"/>
+
+<script th:replace="fragment/datatables :: datatables "/>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+
+
+        $("document").ready(function() {
+
+
+        });
+
+        /*]]>*/
+    </script>
+
+</body>
+</html>

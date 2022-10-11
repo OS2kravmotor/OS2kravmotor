@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+<div class="wrapper">
+    <header th:replace="fragment/navbar :: navbar-header"/>
+    <aside th:replace="fragment/vendornavbar :: vendornavbar-aside (page = 'vendorpurchase')"/>
+
+    <section>
+        <div class="content-wrapper">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 th:text="${purchaseAnswer.purchase.title}"/>
+				</div>
+	            <div class="panel-body">
+	
+	
+	                <div class="row">
+	                    <div class="col-lg-12">
+	                        <form id="purchase-form" class="form-horizontal" th:object="${purchaseAnswer}">
+							<div class="row" style="margin-bottom: 20px; margin-right: 0px;">
+								<button id="vendorSendBtn" th:onclick="'javascript:vendorService.send(' + ${purchaseAnswer.id} + ')'" class="btn btn-primary" style="float: right; display: none;" th:text="#{html.vendor.purchase.sendback}"></button>
+							</div>
+	
+	                            <ul class="nav nav-tabs">
+	                                <li id="purchase_master_tab" class="active">
+	                                    <a data-toggle="tab" href="#purchase_master" th:text="#{html.purchase.tab.master}"/>
+	                                </li>
+
+	                                <li th:if="${purchaseAnswer.solutionType != T(dk.digitalidentity.re.dao.model.enums.SolutionType).NOT_SET}">
+	                                    <a data-toggle="tab" href="#purchase_requirements" th:text="#{html.purchase.tab.requirements}"/>
+	                                </li>
+	                            </ul>
+	
+	                            <div class="tab-content">	
+	                                <div id="purchase_master" class="tab-pane fade in active">
+	                                </div>
+	
+	                                <div id="purchase_requirements" class="tab-pane fade in" th:if="${purchaseAnswer.solutionType != T(dk.digitalidentity.re.dao.model.enums.SolutionType).NOT_SET}">
+	                                </div>
+	                            </div>
+	                        </form>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+    </section>
+</div>
+
+<!-- Modal setItSystemModal-->
+<div class="modal fade" id="setItSystemModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" th:if="${purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" th:text="#{html.vendor.setitsystemdialog.title}"/>
+            </div>
+            <div class="modal-body">
+                <table class="itSystemListTable table table-striped table-hover searchable-table">
+                    <thead>
+                    <tr>
+                        <th class="col-md-1" th:text="#{html.itsystem.systemid}"/>
+                        <th class="col-md-5" th:text="#{html.itsystem.name}"/>
+                        <th class="col-md-5" th:text="#{html.itsystem.vendor}"/>
+                        <th class="col-md-1" th:text="#{html.header.operation}"/>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="itSystem: ${itsystems}">
+                        <td th:text="${itSystem.systemId}"/>
+                        <td th:text="${itSystem.name}"/>
+                        <td th:text="${itSystem.vendor}"/>
+                        <td class="text-center">
+                            <a href="#" data-dismiss="modal" onclick="setItSystem(this);" th:attr="data-id=${itSystem.id}"><em class="fa fa-mail-forward"></em></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="clearItSystem();" th:text="#{html.control.button.clear}"></button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal" th:text="#{html.control.button.cancel}"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal copyAnswersModal-->
+<div class="modal fade" id="copyAnswersModal" tabindex="-1" role="dialog" aria-labelledby="copyAnswersModal" aria-hidden="true" th:if="${purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" th:text="#{html.vendor.copyanswers}"/>
+            </div>
+            <div class="modal-body">
+                <div class="col-sm-8" th:text="#{html.vendor.copyanswers.description}"></div>
+                <table class="itSystemListTable table table-striped table-hover searchable-table">
+                    <thead>
+                    <tr>
+                        <th class="col-md-4" th:text="#{html.itsystem.name}"/>
+                        <th class="col-md-2" th:text="#{html.purchase.itsystem}"/>
+                        <th class="col-md-3" th:text="#{html.purchase.customer}"/>
+                        <th class="col-md-1" th:text="#{html.header.operation}"/>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="otherPurchaseAnswer: ${otherPurchaseAnswers}">
+                        <td th:text="${otherPurchaseAnswer.title}"/>
+                        <td th:text="${otherPurchaseAnswer.itSystem}!=null ? ${otherPurchaseAnswer.itSystem} : #{html.vendor.itsystem.notset}"/>
+                        <td th:text="${otherPurchaseAnswer.customer}"/>
+                        <td class="text-center">
+                            <a href="#" data-dismiss="modal" onclick="copyAnswers(this);" th:attr="data-id=${otherPurchaseAnswer.id}"><em class="fa fa-mail-forward"></em></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" th:text="#{html.control.button.cancel}"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div th:replace="fragment/footer :: footer"/>
+
+
+<script th:inline="javascript">
+		/*<![CDATA[*/
+
+            /*[+
+            	var baseUrl = [[@{/}]];
+				var cancelTxt = [[#{html.control.button.no}]];
+				var confirmTxt = [[#{html.control.button.yes}]];
+				var swalConfirmExitTitle = [[#{html.vendor.exit.title}]];
+				var swalConfirmExitText = [[#{html.vendor.exit.text}]];
+				
+				var swalConfirmDoneAnsweringTitle = [[#{html.vendor.done.title}]];
+				var swalConfirmDoneAnsweringText = [[#{html.vendor.done.text}]];
+
+				var validationRequired = [[#{html.error.jquery.required}]];
+				var validationMinChars = [[#{html.error.jquery.minchars}]];
+
+				$.extend( $.validator.messages, {
+					required: validationRequired,
+					minlength: $.validator.format(validationMinChars)
+				});
+				
+				var vendorMustElaborate = [[${purchaseAnswer.vendorMustElaborate}]];
+				var fieldNotUpdatedMsg = [[#{html.purchase.failedupdate}]];
+				var mailsentmsg = [[#{html.purchase.answer.vendor.send.success}]];
+				var fromSolutionType = [[${fromSolutionType}]];
+			+]*/
+
+			var token = $("meta[name='_csrf']").attr("content");
+			var vendorService;
+			$("document").ready(function () {
+			    loadPurchaseMaster();
+			    loadPurchaseRequirementAnswerList();
+			    
+			    vendorService = new VendorService();
+			    
+			    if (vendorMustElaborate) {
+					$("#vendorSendBtn").css('display', '')
+				}
+
+			    if (fromSolutionType) {
+					startAnswering();
+				}
+			});
+			
+			function VendorService() {
+				this.send = function(id) {
+					$.ajax({
+						url : baseUrl + 'rest/vendor/purchaseanswer/'+ id + '/customer/send',
+						type : 'post',
+						headers: {
+							'X-CSRF-TOKEN': token
+						},
+						success : function(data) {
+							$.notify(mailsentmsg, {
+								status : 'success',
+								pos : 'top-right'
+							});
+							$("#vendorSendBtn").prop("disabled",true);
+						},
+						error : function(response) {
+							$.notify(fieldNotUpdatedMsg, {
+								status : 'danger',
+								pos : 'top-right'
+							});
+						},
+					});
+				}
+			}
+
+			function startAnswering() {
+				/*[+
+					var purchaseAnswerId = [[${purchaseAnswer.id}]];
+					var solutionType = [[${purchaseAnswer.solutionType}]];
+				 +]*/
+				if (solutionType == "NOT_SET") {
+					window.location.href = '/vendor/purchase/solutiontype/' + purchaseAnswerId;
+				}
+				else {
+					$('.nav-tabs a[href="#purchase_requirements"]').tab('show');
+				}
+			}
+
+			function clearItSystem(){
+				/*[+
+					var purchaseAnswerId = [[${purchaseAnswer.id}]];
+					var editUrl = [[@{/vendor/purchase/edit/}]] + purchaseAnswerId
+					var url = editUrl  + '/clearitsystem'
+				 +]*/
+
+				$.ajax({
+					type: "POST",
+					url: url,
+					headers: {
+						'X-CSRF-TOKEN': token
+					},
+					success: function() {
+                        loadPurchaseMaster();
+					},
+					error : function(response) {
+						// on error
+						swal(response.responseText);
+					}
+				});
+			}
+
+			function setItSystem(obj) {
+				var id = $(obj).data('id');
+
+				/*[+
+					var purchaseAnswerId = [[${purchaseAnswer.id}]];
+					var editUrl = [[@{/vendor/purchase/edit/}]] + purchaseAnswerId
+					var url = editUrl  + '/setitsystem/'
+				 +]*/
+				$.ajax({
+					type: "POST",
+					url: url+id,
+					headers: {
+						'X-CSRF-TOKEN': token
+					},
+					success: function() {
+						loadPurchaseMaster();
+					},
+					error : function(response) {
+						// on error
+						swal(response.responseText);
+					}
+				});
+			}
+
+			function copyAnswers(obj) {
+				var id = $(obj).data('id');
+
+				/*[+
+					var purchaseAnswerId = [[${purchaseAnswer.id}]];
+					var editUrl = [[@{/vendor/purchase/edit/}]] + purchaseAnswerId
+					var url = editUrl  + '/copyanswers/'
+				 +]*/
+				$.ajax({
+					type: "POST",
+					url: url+id,
+					headers: {
+						'X-CSRF-TOKEN': token
+					},
+					success: function() {
+						loadPurchaseMaster();
+						loadPurchaseRequirementAnswerList();
+                        $.notify({
+                            message: [[#{html.answer.copymsg}]]
+                            }, {
+                                status : 'success',
+                                pos : 'top-right'
+                            });
+					},
+					error : function(response) {
+						// on error
+						swal(response.responseText);
+					}
+				});
+			}
+
+            function exitPurchaseAnswer(id) {
+                swal({
+                        title: swalConfirmExitTitle,
+                        text : swalConfirmExitText,
+                        type : "warning",
+                        showCancelButton : true,
+                        confirmButtonColor : "#DD6B55",
+                        confirmButtonText : confirmTxt,
+                        cancelButtonText : cancelTxt,
+                        closeOnConfirm : true,
+                        closeOnCancel : true
+                    },
+                    function(isConfirm) {
+                        if (isConfirm) {
+                            window.location.href = '/vendor/purchase/exit/' + id;
+                        }
+                    }
+                );
+            }
+
+            function finishPurchaseAnswer(id) {
+                swal({
+                        title: swalConfirmDoneAnsweringTitle,
+                        text : swalConfirmDoneAnsweringText,
+                        type : "warning",
+                        showCancelButton : true,
+                        confirmButtonColor : "#DD6B55",
+                        confirmButtonText : confirmTxt,
+                        cancelButtonText : cancelTxt,
+                        closeOnConfirm : true,
+                        closeOnCancel : true
+                    },
+                    function(isConfirm) {
+                        if (isConfirm) {
+                            window.location.href = '/vendor/purchase/done/' + id;
+                        }
+                    }
+                );
+            }
+
+			//Fix for datatables in modals
+			$(document).on('shown.bs.modal', function (e) {
+				$.fn.dataTable.tables( {visible: true, api: true} ).columns.adjust();
+			});
+
+			$("document").ready(function() {
+				/*[+
+			   			var searchTxt = [[#{html.datatables.search}]];
+			   			var dropdownTxt = [[#{html.datatables.dropdown}]];
+			   			var infoDefaultTxt = [[#{html.datatables.info.default}]];
+			   			var infoEmptyTxt = [[#{html.datatables.info.empty}]];
+			   			var infoFilteredTxt = [[#{html.datatables.info.filtered}]];
+			   			var prevTxt = [[#{html.datatables.prev}]];
+			   			var nextTxt = [[#{html.datatables.next}]];
+				+]*/
+
+			    $('.itSystemListTable').DataTable({
+			        "paging":   true,
+			        "ordering": true,
+			        "info":     true,
+			        "stateSave": true,
+			        "lengthChange": false,
+			        "language": {
+			            "search":       searchTxt,
+			            "lengthMenu":   dropdownTxt,
+			            "info":         infoDefaultTxt,
+			            "zeroRecords":  infoEmptyTxt,
+			            "infoEmpty":    "",
+			            "infoFiltered": infoFilteredTxt,
+			            "paginate": {
+			            	"next": nextTxt,
+			            	"previous": prevTxt
+			            }
+			        }
+			    });
+			});
+
+			$("#purchase_master_tab").click(function(){
+				loadPurchaseMaster();
+			});
+
+			function loadPurchaseMaster() {
+				/*[+
+					var purchaseAnswerId = [[${purchaseAnswer.id}]];
+				+]*/
+				$("#purchase_master").load("/vendor/purchase/purchasemaster/" + purchaseAnswerId);
+			}
+
+			function loadPurchaseRequirementAnswerList() {
+				/*[+
+					var purchaseAnswerId = [[${purchaseAnswer.id}]];
+					var solutionType = [[${purchaseAnswer.solutionType}]];
+				+]*/
+				if (solutionType != "NOT_SET") {
+					$("#purchase_requirements").load("/vendor/purchase/purchaserequirementlist/" + purchaseAnswerId);
+					window.onbeforeunload = null;
+				}
+			}
+
+            function loadPurchaseRequirementAnswer(id) {
+                $("#purchase_requirements").load("/vendor/purchase/answer/" + id,function(){initializeAnswerForm();});
+            }
+
+		/*]]>*/
+
+</script>
+</body>
+</html>

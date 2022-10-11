@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/vendornavbar :: vendornavbar-aside (page = 'vendorpurchase')" />
+
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 th:text="#{html.navbar.vendorpurchaselist}"/>
+					</div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="table-responsive">
+									<table class="listTable table table-striped table-hover">
+										<thead>
+											<tr>
+												<th class="col-md-5" th:text="#{html.purchase.title}"/>
+												<th class="col-md-2" th:text="#{html.purchase.customer}"/>
+												<th class="col-md-2" th:text="#{html.purchase.itsystem}"/>
+												<th class="col-md-2" th:text="#{html.purchase.status}"/>
+												<th class="col-md-1" th:text="#{html.header.operation}"/>
+											</tr>
+										</thead>
+	
+										<tbody>
+											<tr th:each="purchaseForm : ${purchaseForms}">
+												<td th:text="${purchaseForm.purchaseAnswer.purchase.title}"/>
+												<td th:text="${purchaseForm.customerName}"/>
+												<td th:text="${purchaseForm.purchaseAnswer.itSystem}!=null ? (${purchaseForm.purchaseAnswer.itSystem.name}+' ('+${purchaseForm.purchaseAnswer.itSystem.vendor}+')') : #{html.vendor.itsystem.notset}" />
+												<td th:if="${purchaseForm.purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).COMPLETED && purchaseForm.purchaseAnswer.vendorMustElaborate}" th:text="#{html.vendor.purchase.status}"/>
+												<td th:unless="${purchaseForm.purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).COMPLETED && purchaseForm.purchaseAnswer.vendorMustElaborate}" th:text="#{__${T(dk.digitalidentity.re.dao.model.enums.Status).valueOf(purchaseForm.purchaseAnswer.purchase.status).value}__}" />
+												<td>
+													<a th:href="@{/vendor/purchase/edit/} + ${purchaseForm.purchaseAnswer.id}" >
+														<em class="fa fa-fw"
+															th:classappend="${purchaseForm.purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE} ? fa-pencil : fa-search"
+															th:title="${purchaseForm.purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE} ? #{html.mouseover.answer} : #{html.mouseover.view}">
+														</em>
+													</a>
+													
+													<a th:if="${purchaseForm.purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).COMPLETED && purchaseForm.purchaseAnswer.vendorMustElaborate}" th:href="@{/vendor/purchase/edit/} + ${purchaseForm.purchaseAnswer.id}" >
+														<em 
+															class="fa fa-fw fa-pencil"
+															th:title="#{html.mouseover.answer}">
+														</em>
+													</a>
+													
+													<a th:href="@{/vendor/purchase/download/answers/} + ${purchaseForm.purchaseAnswer.id}" >
+														<em 
+															class="fa fa-fw fa-file-pdf-o"
+															aria-hidden="true">
+														</em>
+													</a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+<div th:replace="fragment/footer :: footer"/>
+
+<script th:replace="fragment/datatables :: datatables "/>
+<script th:inline="javascript">
+	/*<![CDATA[*/
+		var token = $("meta[name='_csrf']").attr("content");
+
+		function deletePurchase(obj) {
+			var id = $(obj).data('id');
+
+			/*[+
+			var deleteURI = [[@{/purchase/}]] + id
+			var url = [[@{/purchase/list}]];
+			var urlWithId = [[@{/purchase/}]] + id;
+			var titleTxt = [[#{html.purchase.list.delete.confirm.title}]];
+			var bodyTxt = [[#{html.purchase.list.delete.confirm.body}]];
+			var cancelTxt = [[#{html.control.button.no}]];
+			var deleteTxt = [[#{html.control.button.yes}]];
+			var errorMsg = [[#{html.domain.list.errormsg}]];
+			+]*/
+
+			swal({
+				html: true,
+				title : titleTxt,
+				text : bodyTxt,
+				type: "warning",
+				showCancelButton: true,
+				confirmButtonColor: "#DD6B55",// : "#AEDEF4"),
+				confirmButtonText: deleteTxt,
+				cancelButtonText: cancelTxt,
+				closeOnConfirm : true,
+				closeOnCancel : true
+			},
+			function (isConfirm) {
+				if (isConfirm) {
+					$.ajax({
+						type: "DELETE",
+						url: deleteURI,
+						headers: {
+							'X-CSRF-TOKEN': token
+						},
+						success: function() {
+							window.location.href = url;
+						},
+						error: function() {
+							$.notify({
+								message: errorMsg
+							},{
+								status: 'danger',
+								autoHideDelay: 4000
+							});
+						}
+					});
+				}
+			});
+		}
+
+	/*]]>*/
+</script>
+</body>
+</html>

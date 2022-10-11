@@ -1,0 +1,1 @@
+ALTER TABLE purchase_answer ADD COLUMN done_answering BOOLEAN DEFAULT false;

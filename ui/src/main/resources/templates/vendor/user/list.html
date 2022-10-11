@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/vendornavbar :: vendornavbar-aside (page = 'vendoruser')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<h3 sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoradministrator')">
+					<a class="btn btn-default" th:href="@{/vendor/user/new}">
+						<i class="fa fa-plus" style="margin-right: 10px;"></i>
+						<span th:text="#{html.vendoruser.addvendoruser}" />
+					</a>
+				</h3>
+
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 th:text="#{html.navbar.vendorusers}"/>
+					</div>
+					<div class="panel-body">
+	
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="table-responsive">
+									<table class="listTable table table-striped table-hover">
+										<thead>
+										<tr>
+											<th class="col-md-6" th:text="#{html.vendoruser.email}"/>
+											<th class="col-md-5" th:text="#{html.vendoruser.administrator}"/>
+											<th sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoradministrator')" class="col-md-1" th:text="#{html.vendoruser.operation}" />
+										</tr>
+										</thead>
+	
+										<tbody>
+										<tr th:each="vendorUser : ${vendorUsers}">
+											<td th:text="${vendorUser.email}"/>
+											<td>
+												<span th:class="${vendorUser.admin}? 'fa fa-check'"/>
+											</td>
+											<td sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoradministrator')">
+												<a th:href="@{/vendor/user/edit/{id}(id=${vendorUser.id})}"><em class="fa fa-fw fa-pencil"></em></a>
+												<a href="#" class="openConfirmDeleteDialog" th:attr="data-id=${vendorUser.id}"><em class="fa fa-fw fa-remove"></em></a>
+											</td>
+										</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer" />
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+
+	/*[+
+		var cancelTxt = [[#{html.control.button.no}]];
+		var confirmTxt = [[#{html.control.button.yes}]];
+		var vendorUserDeletedMsg = [[#{html.vendoruser.deletedmsg}]];
+		var vendorUserNotDeletedMsg = [[#{html.vendoruser.faileddelete}]];
+	+]*/
+	var token = $("meta[name='_csrf']").attr("content");
+
+	$('.openConfirmDeleteDialog').on("click", function (e) {
+		e.preventDefault();
+		/*[+
+		var titleTxt = [[#{html.vendoruser.delete.confirm.title}]];
+		var bodyTxt = [[#{html.vendoruser.delete.confirm.body}]];
+		+]*/
+
+		var clickedElement = $(this);
+
+		swal(
+			{
+				html: true,
+				title: titleTxt,
+				text: bodyTxt,
+				type: "warning",
+				showCancelButton: true,
+				confirmButtonColor: "#DD6B55",
+				confirmButtonText: confirmTxt,
+				cancelButtonText: cancelTxt,
+				closeOnConfirm: true,
+				closeOnCancel: true
+			},
+			function (isConfirm) {
+				if (isConfirm) {
+					removeVendorUser(clickedElement);
+				}
+			}
+		);
+	});
+
+	function removeVendorUser(element) {
+		var targetUrl = "/vendor/user/" + element.data('id');
+
+		$.ajax({
+			url: targetUrl,
+			method: 'DELETE',
+			cache: false,
+			headers: {
+				'X-CSRF-TOKEN': token
+			},
+			error: function (response) {
+				$.notify(vendorUserNotDeletedMsg, {
+					status: 'danger',
+					pos: 'top-right'
+				});
+			},
+			success: function (response) {
+				$.notify(vendorUserDeletedMsg, {
+					status: 'success',
+					pos: 'top-right'
+				});
+				// remove row on ui
+				element.closest('tr').remove();
+			}
+		});
+	}
+
+
+	/*]]>*/
+	</script>
+</body>
+</html>

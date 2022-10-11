@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>dk.digitalidentity.re</groupId>
+	<artifactId>re-webjar</artifactId>
+	<name>Requirement Engine WebJar</name>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>dk.digitalidentity.re</groupId>
+		<artifactId>re-parent</artifactId>
+		<version>1.0.0</version>
+	</parent>
+
+	<build>
+		<finalName>re-webjar</finalName>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>jquery-validation</artifactId>
+			<version>1.16.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.webjars</groupId>
+					<artifactId>jquery</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.webjars.bower</groupId>
+			<artifactId>multi-select</artifactId>
+			<version>0.9.11</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>jquery-cookie</artifactId>
+			<version>1.4.1-1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.webjars</groupId>
+					<artifactId>jquery</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>dk.digitalidentity</groupId>
+			<artifactId>angle-webjar</artifactId>
+			<version>3.7.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>Eonasdan-bootstrap-datetimepicker</artifactId>
+			<version>4.17.43</version>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>summernote</artifactId>
+			<version>0.8.10</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>jstree</artifactId>
+			<version>3.3.7</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>local-repo</id>
+			<url>file://${project.basedir}/libs</url>
+		</repository>
+	</repositories>
+</project>

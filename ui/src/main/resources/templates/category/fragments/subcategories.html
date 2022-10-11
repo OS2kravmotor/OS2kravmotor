@@ -1,0 +1,114 @@
+<th:block th:fragment="subcategories" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<input id="subcategoriesCategoriId" th:value="${categoryId}" hidden>
+	<button onclick="subcategoriesService.addSubcategory(); return false;" class="btn btn-primary">Opret underkategori</button>
+	<br>
+	<div class="table-responsive">
+		<table class="table table-striped table-hover">
+			<thead>
+				<tr>
+					<th class="col-md-11" th:text="#{html.category.list.name}"/>
+					<th class="col-md-1" th:text="#{html.header.operation}" />
+				</tr>
+			</thead>
+
+			<tbody>
+				<tr th:each="category : ${subcategories}">
+					<td th:text="${category.name}"/>
+					<td>
+						<a onclick="subcategoriesService.deleteSub(this)" href="#" th:attr="data-id=${category.id}"><em class="fa fa-fw fa-remove" th:title="#{html.mouseover.delete}"></em></a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+</th:block>
+
+<th:block th:fragment="subcategoriesScript" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+		/*[+
+		+]*/
+		
+		var subcategoriesService;
+		$(document).ready(function() {
+			subcategoriesService = new SubcategoriesService();
+		});
+		
+		function SubcategoriesService() {
+			
+			this.init = function() {
+				
+			}
+			
+			this.addSubcategory = function() {
+				var id = $("#subcategoriesCategoriId").val();
+				console.log(id)
+				$("#editCategoryModal").hide();
+	            $('#addSubcategoryModal').modal("show");
+	            $('#addSubcategoryModal').find('.error').remove();
+	            $('#addSubcategoryId').val(id);
+	            $('#addSubcategoryName').val("").focus();
+			}
+			
+			this.closeAdd = function() {
+				$("#editCategoryModal").show();
+				$('#addSubcategoryModal').modal("hide");
+			}
+			
+			this.saveSubcategory = function() {
+				var id = $("#subcategoriesCategoriId").val();
+				$.ajax({
+					type: "POST",
+					url: "/category/" + id + "/addsubcategory?name=" + $('#addSubcategoryName').val(),
+					headers: {
+						'X-CSRF-TOKEN': token
+					},
+					success: function() {
+						$("#editCategoryModal").show();
+						$('#addSubcategoryModal').modal("hide");
+						loadSubcategories(id);
+						$.notify(savedMsg, {
+							status : 'success',
+							pos : 'top-right'
+						});
+					},
+					error: function(jqXHR, textStatus, error) {
+						$.notify(errorMsg, {
+							status : 'warning',
+							pos : 'top-right'
+						});
+					}
+				});
+			}
+			
+			this.deleteSub = function(obj) {
+				var id = $("#subcategoriesCategoriId").val();
+				var subId = $(obj).attr('data-id');
+				$.ajax({
+					type: "POST",
+					url: "/category/" + id + "/deletesubcategory?subid=" + subId,
+					headers: {
+						'X-CSRF-TOKEN': token
+					},
+					success: function() {
+						loadSubcategories(id);
+						$.notify(deletedMsg, {
+							status : 'success',
+							pos : 'top-right'
+						});
+					},
+					error: function(jqXHR, textStatus, error) {
+						$.notify(errorMsg, {
+							status : 'warning',
+							pos : 'top-right'
+						});
+					}
+				});
+			} 
+		}
+
+		/*]]>*/
+	</script>
+</th:block>

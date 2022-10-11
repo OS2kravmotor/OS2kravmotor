@@ -1,0 +1,98 @@
+<fieldset>
+    <div class="form-group">
+        <label class="col-sm-2 control-label" th:text="#{html.purchase.description}"/>
+        <div class="col-sm-8">
+            <div th:text="${purchaseAnswer.purchase.description}" class="preformat form-control" style="height: auto !important;" th:readonly="readonly"/>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset>
+    <div class="form-group">
+        <label class="col-sm-2 control-label" th:text="#{html.purchase.status}"/>
+        <div class="col-sm-8">
+            <div th:text="#{__${T(dk.digitalidentity.re.dao.model.enums.Status).valueOf(purchaseAnswer.purchase.status).value}__}" class="preformat form-control" style="height: auto !important;" th:readonly="readonly"/>
+            <span th:if="${purchaseAnswer.doneAnswering}" th:text="#{html.vendor.finishedAnswering}"></span>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset>
+    <div class="form-group">
+        <label class="col-sm-2 control-label" th:text="#{html.purchase.deadline}"/>
+        <div class="col-sm-8">
+            <input th:value="${purchaseAnswer.purchase.endTime} ? ${#dates.format(purchaseAnswer.purchase.endTime, 'yyyy/MM/dd - HH:mm')}" class="form-control" th:readonly="readonly"/>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset>
+    <div class="form-group">
+        <label class="col-sm-2 control-label" th:text="#{html.vendor.progress.label}"/>
+        <div class="col-sm-8">
+            <div class="col-sm-12 form-control" th:readonly="readonly">
+                <em th:if="${reqAnswered lt reqTotal}" class="fa fa-fw fa-lightbulb-o" style="color: red;"></em>
+                <em th:if="${reqAnswered} == ${reqTotal}" class="fa fa-fw fa-lightbulb-o" style="color: green;"></em>
+                <span th:utext="#{html.vendor.progress.text(${reqAnswered}, ${reqTotal})}"></span>
+
+                <div th:if="${reqDirty gt 0}">
+                    <em class="fa fa-fw fa-lightbulb-o" style="color: orange;"></em>
+                    <span th:utext="#{html.vendor.progress.dirty(${reqDirty})}"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset>
+    <div class="form-group">
+        <label class="col-sm-2 control-label" th:text="#{html.purchase.itsystem}"/>
+        <div class="col-sm-8">
+            <input th:value="${purchaseAnswer.itSystem}!=null ? (${purchaseAnswer.itSystem.name}+' ('+${purchaseAnswer.itSystem.vendor}+')') : #{html.vendor.itsystem.notset}" class="form-control" th:readonly="readonly"/>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset>
+    <div class="form-group">
+        <label class="col-sm-2 control-label" th:text="#{html.vendor.purchase.solutiontype}"/>
+        <div class="col-sm-8">
+            <input th:value="#{__${purchaseAnswer.solutionType.message}__}" class="form-control" th:readonly="readonly"/>
+        </div>
+    </div>
+</fieldset>
+
+<a class="btn btn-primary" href="#" style="min-width:200px; margin-right: 20px; margin-bottom: 20px;" onclick="startAnswering();" th:if="${purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}">
+    <em class="fa fa-play" aria-hidden="true" style="margin-right: 10px;"></em>
+    <span th:text="#{html.vendor.startanswering}"/>
+</a>
+
+<a class="btn btn-default" th:href="'/vendor/purchase/download/requirements/' + ${purchaseAnswer.id}" target="_blank" style="color: #515253; min-width:200px; margin-right: 20px; margin-bottom: 20px;">
+    <em class="fa fa-file-excel-o" aria-hidden="true" style="margin-right: 10px;"></em>
+    <span th:text="#{html.vendor.requirements.download}"/>
+</a>
+
+<a class="btn btn-default" th:href="'/vendor/purchase/download/answers/' + ${purchaseAnswer.id}" target="_blank" style="color: #515253; min-width:200px; margin-right: 20px; margin-bottom: 20px;">
+    <em class="fa fa-file-pdf-o" aria-hidden="true" style="margin-right: 10px;"></em>
+    <span th:text="#{html.vendor.answers.download}"/>
+</a>
+
+<a class="btn btn-default" href="#" style="color: #515253; min-width:200px; margin-right: 20px; margin-bottom: 20px;" data-toggle="modal" data-target="#setItSystemModal" th:if="${purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE && !purchaseAnswer.doneAnswering}">
+    <em class="fa fa-laptop" aria-hidden="true" style="margin-right: 10px;"></em>
+    <span th:text="#{html.vendor.setitsystem}"/>
+</a>
+
+<a class="btn btn-default" href="#" style="color: #515253; min-width:200px; margin-right: 20px; margin-bottom: 20px;" data-toggle="modal" data-target="#copyAnswersModal" th:if="${purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE && !purchaseAnswer.doneAnswering}">
+    <em class="fa fa-copy" aria-hidden="true" style="margin-right: 10px;"></em>
+    <span th:text="#{html.vendor.copyanswers}"/>
+</a>
+
+<a class="btn btn-default" href="#" style="color: #515253; min-width:200px; margin-right: 20px; margin-bottom: 20px;" th:onclick="'exitPurchaseAnswer(\'' + ${purchaseAnswer.id} + '\');'" th:if="${purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE && !purchaseAnswer.doneAnswering}">
+    <em class="fa fa-times" aria-hidden="true" style="margin-right: 10px;"></em>
+    <span th:text="#{html.vendor.exit}"/>
+</a>
+
+<a class="btn btn-default" href="#" style="color: #515253; min-width:200px; margin-right: 20px; margin-bottom: 20px;" th:onclick="'finishPurchaseAnswer(\'' + ${purchaseAnswer.id} + '\');'" th:if="${purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE && !purchaseAnswer.doneAnswering && !purchaseAnswer.vendorMustElaborate}">
+    <em class="fa fa-send" aria-hidden="true" style="margin-right: 10px;"></em>
+    <span th:text="#{html.vendor.done}"/>
+</a>

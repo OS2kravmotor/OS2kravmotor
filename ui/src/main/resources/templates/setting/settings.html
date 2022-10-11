@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'settings')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 th:text="#{html.setting.title}"/>
+					</div>
+					<div class="panel-body">
+						
+						
+						<div class="row">
+							<div class="col-lg-12">
+								<form id="setting-form" class="form-horizontal" method="post" th:action="@{/setting/}" th:object="${settingForm}">
+									<input id="realOnlyEditorsCanRemoveMinimumRequirements" type="hidden" th:field="*{onlyEditorsCanRemoveMinimumRequirements}" />
+									<input id="realAskVendorForPrice" type="hidden" th:field="*{askVendorForPrice}" />
+									
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-3 control-label" th:text="#{html.setting.only_editors_can_remove_minimum_requirements}"/>
+											<div class="col-sm-7">
+												<div class="checkbox c-checkbox" style="width: 100% !important;">
+													<label>
+														<input id="onlyEditorsCanRemoveMinimumRequirements" type="checkbox" th:checked="*{onlyEditorsCanRemoveMinimumRequirements}"/>
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-3 control-label" th:text="#{html.setting.ask_vendor_for_price}"/>
+											<div class="col-sm-7">
+												<div class="checkbox c-checkbox" style="width: 100% !important;">
+													<label>
+														<input id="askVendorForPrice" type="checkbox" th:checked="*{askVendorForPrice}"/>
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-3 control-label" th:text="#{html.setting.api_key} + ' *'"/>
+											<div class="col-sm-7">
+												<input id="apiKey" th:field="*{apiKey}" class="form-control" />
+												<ul th:if="${#fields.hasErrors('apiKey')}" class="error">
+													<li class="error" th:each="err : ${#fields.errors('apiKey')}" th:text="#{__${err}__}"/>
+												</ul>
+											</div>
+	
+										</div>
+									</fieldset>
+									
+	
+									<fieldset>
+										<div class="form-group">
+											<div class="col-sm-offset-3 col-sm-7">
+												<button type="submit" style="margin-right: 5px;" class="btn btn-lg btn-primary col-xs-2" th:text="#{html.control.button.save}"/>
+											</div>
+										</div>
+									</fieldset>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer" />
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+        /*[+
+         var successMsg = [[#{html.setting.update.msg.success}]];
+         var failedMsg = [[#{html.setting.update.msg.failed}]];
+         +]*/
+
+		$("document").ready(function() {
+			var saved = [[${saved}]];
+
+			if (typeof saved != "undefined" && saved != null) {
+			    if (saved) {
+                    $.notify({
+                        message: successMsg,
+                        pos: "top-right"
+                    },{
+                        status: 'success',
+                        autoHideDelay: 4000
+                    });
+                } else if(!saved) {
+                    $.notify({
+                        message: failedMsg,
+                        pos: "top-right"
+                    },{
+                        status: 'warning',
+                        autoHideDelay: 4000
+                    });
+                }
+            }
+
+		    $('#onlyEditorsCanRemoveMinimumRequirements').change(function() {
+				if ($('#onlyEditorsCanRemoveMinimumRequirements').is(':checked')) {
+					$('#realOnlyEditorsCanRemoveMinimumRequirements').val(1);
+				} else {
+					$('#realOnlyEditorsCanRemoveMinimumRequirements').val(0);
+				}
+			});
+		    
+		    $('#askVendorForPrice').change(function() {
+				if ($('#askVendorForPrice').is(':checked')) {
+					$('#realAskVendorForPrice').val(1);
+				} else {
+					$('#realAskVendorForPrice').val(0);
+				}
+			});
+		});
+		/*]]>*/
+	</script>
+</body>
+</html>

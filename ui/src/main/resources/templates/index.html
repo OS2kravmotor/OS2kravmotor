@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header" />
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside sec:authorize="!hasRole('ROLE_http://kravmotoren.dk/vendoruser')" th:replace="fragment/navbar :: navbar-aside (page = 'index')" />
+		<aside sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoruser')" th:replace="fragment/vendornavbar :: vendornavbar-aside (page = 'index')" />
+
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-sm-12" th:utext="${frontpage}"/>
+						</div>
+						
+						<hr/>
+
+						<div class="row">
+							<div class="col-sm-12">
+								<div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+									<div class="panel widget bg-primary">
+										<div class="row row-table">
+											<div class="col-xs-4 text-center bg-primary-dark pv-lg">
+												<em class="fa fa-dollar fa-3x"></em>
+											</div>
+											<div class="col-xs-8 pv-lg">
+												<div class="h2 mt0" th:text="${purchases}"></div>
+												<div class="text-uppercase" th:utext="#{html.index.purchases}"></div>
+											</div>
+										</div>
+									</div>
+								</div>
+								
+								<div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+									<div class="panel widget bg-primary">
+										<div class="row row-table">
+											<div class="col-xs-4 text-center bg-primary-dark pv-lg">
+												<em class="fa fa-file-excel-o fa-3x"></em>
+											</div>
+											<div class="col-xs-8 pv-lg">
+												<div class="h2 mt0" th:text="${downloads}"></div>
+												<div class="text-uppercase" th:utext="#{html.index.full.requirements.download}"></div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+									<div class="panel widget bg-primary">
+										<div class="row row-table">
+											<div class="col-xs-4 text-center bg-primary-dark pv-lg">
+												<em class="fa fa-sitemap fa-3x"></em>
+											</div>
+											<div class="col-xs-8 pv-lg">
+												<div class="h2 mt0" th:text="${organisations}"></div>
+												<div class="text-uppercase" th:utext="#{html.index.vendor.organisations}"></div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-xl-3 col-lg-4 col-md-6 col-sm-12">
+									<div class="panel widget bg-primary">
+										<div class="row row-table">
+											<div class="col-xs-4 text-center bg-primary-dark pv-lg">
+												<em class="fa fa-users fa-3x"></em>
+											</div>
+											<div class="col-xs-8 pv-lg">
+												<div class="h2 mt0" th:text="${municipalities}"></div>
+												<div class="text-uppercase" th:utext="#{html.index.municipalities}"></div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						<hr/>
+
+						<div class="row">
+							<div class="col-sm-12">
+								<h3 th:text="#{html.index.recent.requirements.headline}"></h3>
+							</div>
+
+							<div class="col-sm-12">
+								<div class="table-responsive">
+									<table style="padding-right:0px !important;" id="recentRequirementsTable" class="table table-striped table-hover" >
+										<thead>
+											<tr>
+												<th class="col-md-1" th:text="#{html.index.recent.requirements.id}"></th>
+												<th class="col-md-5" th:text="#{html.index.recent.requirements.name}"></th>
+												<th class="col-md-2" th:text="#{html.index.recent.requirements.category}"></th>
+												<th class="col-md-3" th:text="#{html.index.recent.requirements.date}"></th>
+												<th class="col-md-1" th:text="#{html.navbar.operations}" sec:authorize="isAuthenticated()"></th>
+											</tr>
+										</thead>
+	
+										<tbody>
+											<tr th:each="req : ${recentRequirements}">
+												<td th:text="${req.id}"></td>
+												<td th:text="${req.name}"></td>
+												<td th:text="${req.category?.name}"></td>
+												<td th:text="${#dates.format(req.lastChanged, 'yyyy/MM/dd')}"></td>
+												<td sec:authorize="isAuthenticated()">
+													<a th:href="@{/requirement/view/{id}(id=${req.id})}"><em style="color: #212529" class="fa fa-search"></em></a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<style>
+		.text-uppercase {
+			word-break: break-all;
+		}
+	</style>
+	
+	<nav th:replace="fragment/footer :: footer" />
+	
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		/*]]>*/
+	</script>
+</body>
+</html>

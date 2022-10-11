@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'vendor')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<h3>
+					<a class="btn btn-default" th:href="@{/vendor/download}" target="_blank" style="color: #515253">
+						<em class="fa fa-file-excel-o" aria-hidden="true" style="margin-right: 10px;"></em>
+						<span th:text="#{html.vendor.requirements.download}" />
+					</a>
+					
+					<a class="btn btn-default" href="#" style="color: #515253" data-toggle="modal" data-target="#setItSystemModal" th:if="${status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}">
+						<em class="fa fa-laptop" aria-hidden="true" style="margin-right: 10px;"></em>
+						<span th:text="#{html.vendor.setitsystem}" />
+					</a>
+					
+					<a class="btn btn-default" href="#" style="color: #515253" id="exitBtn" th:if="${status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}">
+						<em class="fa fa-times" aria-hidden="true" style="margin-right: 10px;"></em>
+						<span th:text="#{html.vendor.exit}" />
+					</a>
+				</h3>
+				
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<form id="purchase-form" class="form-horizontal" th:object="${purchase}">
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.title}"/>
+											<div class="col-sm-8">
+												<input th:value="*{title}" class="form-control" readonly="readonly"/>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.description}"/>
+											<div class="col-sm-8">
+												<div th:text="*{description}" class="preformat form-control" style="height: auto !important;" th:readonly="readonly"/>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.deadline}"/>
+											<div class="col-sm-8">
+												<input th:value="${purchase.endTime} ? ${#dates.format(purchase.endTime, 'yyyy/MM/dd - HH:mm')}" class="form-control" th:readonly="readonly"/>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.vendor.progress.label}"/>
+											<div class="col-sm-8">
+												<div class="col-sm-12 form-control" th:readonly="readonly">
+													<em th:if="${reqAnswered} == 0" class="fa fa-fw fa-lightbulb-o" style="color: red;"></em>
+													<em th:if="${reqAnswered gt 0 and reqAnswered lt reqTotal}" class="fa fa-fw fa-lightbulb-o" style="color: orange;"></em>
+													<em th:if="${reqAnswered} == ${reqTotal}" class="fa fa-fw fa-lightbulb-o" style="color: green;"></em>
+													<span th:utext="#{html.vendor.progress.text(${reqAnswered}, ${reqTotal})}" />
+												</div>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.itsystem}"/>
+											<div class="col-sm-8">
+												<input th:value="${purchaseVendor.itSystem}!=null ? (${purchaseVendor.itSystem.name}+' ('+${purchaseVendor.itSystem.vendor}+')') : #{html.vendor.itsystem.notset}" class="form-control" th:readonly="readonly" />
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="col-sm-offset-2 col-sm-8">
+											<h3 th:text="#{html.vendor.header.requirement}" />
+											<table class="listTable table table-striped table-hover searchable-table">
+												<thead>
+													<tr>
+														<th th:classappend="${askForPrice} ? col-md-3 : col-md-5" th:text="#{html.vendor.header.requirement}" />
+														<th class="col-md-1" th:text="#{html.vendor.header.answer}" />
+														<th th:if="${askForPrice}" class="col-md-2" th:text="#{html.vendor.header.price}" />
+														<th class="col-md-5" th:text="#{html.vendor.header.details}" />
+														<th class="col-md-1" th:text="#{html.header.operation}" />
+													</tr>
+												</thead>
+	
+												<tbody>
+													<tr th:each="requirementAnswer: ${vendorAnswerForm.requirementAnswers}">
+														<td>
+															<em th:if="${not #lists.isEmpty(requirementAnswer.attachments)}" class="fa fa-fw fa-paperclip"></em>
+															<span th:text="${requirementAnswer.name}" />
+														</td>
+														<td>
+															<span th:if="${requirementAnswer.choice != null}" th:text="#{__${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).valueOf(requirementAnswer.choice).displayName}__}" />
+														</td>
+														<td th:if="${askForPrice}" th:text="${requirementAnswer.price} ?: ''" />
+														<td th:text="${requirementAnswer.detail} ?: ''" class="preformat" />
+														<td>
+															<a th:if="${status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}" href="#" onclick="openAnswerDialogue(this);" th:attr="data-id=${requirementAnswer.purchaseRequirementId}"><em class="fa fa-fw fa-pencil-square-o"></em></a>
+														</td>
+													</tr>
+												</tbody	>
+											</table>
+										</div>
+									</fieldset>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div id="answerModal" class="modal fade" role="dialog" th:if="${status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title" th:text="#{html.vendor.answerdialog.title}" />
+				</div>
+	
+				<div class="modal-body">
+					<form class="form-horizontal" id="answerForm">
+						<input th:type="hidden" id="adId" class="form-control"/>
+						<input th:type="hidden" id="adInfoRequirement" class="form-control"/>
+
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-4 control-label" th:text="#{html.answer.description}"></label>
+								<div class="col-sm-8">
+									<textarea id="adDescription" rows="8" type="text" class="form-control" readonly="readonly"></textarea>
+								</div>
+							</div>
+						</fieldset>
+
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-4 control-label" th:text="#{html.answer.rationale}"></label>
+								<div class="col-sm-8">
+									<textarea id="adRationale" rows="8" type="text" class="form-control" readonly="readonly"></textarea>
+								</div>
+							</div>
+						</fieldset>
+
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-4 control-label" th:text="#{html.answer.attachments}"></label>
+								<div class="col-sm-8">
+									<div id="adAttachments"></div>
+								</div>
+							</div>
+						</fieldset>
+
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-4 control-label" th:text="#{html.answer.priority}"></label>
+								<div class="col-sm-8">
+									<input id="adPriority" class="form-control" readonly="readonly" />
+								</div>
+							</div>
+						</fieldset>
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-4 control-label" th:text="#{html.answer.answer.choice.question}" />
+								<div class="col-sm-8">
+									<select id="adChoice" name="adChoice" class="form-control">
+										<option value="" selected="selected" th:text="#{html.control.select.default}" ></option>
+										<option th:each="choice : ${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).values()}" th:value="${choice}" th:text="#{__${choice.displayName}__}"/>
+									</select>
+								</div>
+							</div>
+						</fieldset>
+	
+						<fieldset id="price-control" style="display: none;">
+							<div class="form-group">
+								<label class="col-sm-4 control-label" th:text="#{html.answer.price}"></label>
+								<div class="col-sm-8">
+									<input id="adPrice" name="adPrice" type="text" class="form-control" />
+								</div>
+							</div>
+						</fieldset>
+	
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-4 control-label" th:text="#{html.answer.answer.optional}" />
+								<div class="col-sm-8">
+									<textarea id="adDetail" name="adDetail" rows="8" type="text" class="form-control"></textarea>
+								</div>
+							</div>
+						</fieldset>
+	
+						<fieldset>
+							<div class="form-group">
+								<div class="col-sm-offset-4 col-sm-8">
+									<button type="button" style="margin-right: 5px;" id="saveAnswerButton" class="btn btn-md btn-primary col-xs-2" th:text="#{html.control.button.save}" />
+									<button type="button" class="btn btn-danger btn-md col-xs-2" data-dismiss="modal" onclick="scrollToStoredPosition();" th:text="#{html.control.button.cancel}"/>
+								</div>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	 
+	<!-- Modal -->
+	<div class="modal fade" id="setItSystemModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" th:if="${status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title" th:text="#{html.vendor.setitsystemdialog.title}" />
+				</div>
+				<div class="modal-body">
+					<table class="itSystemListTable table table-striped table-hover searchable-table">
+						<thead>
+							<tr>
+								<th class="col-md-1" th:text="#{html.itsystem.systemid}" />
+								<th class="col-md-5" th:text="#{html.itsystem.name}" />
+								<th class="col-md-5" th:text="#{html.itsystem.vendor}" />
+								<th class="col-md-1" th:text="#{html.header.operation}" />
+							</tr>
+						</thead>
+
+						<tbody>
+							<tr th:each="itSystem: ${itsystems}">
+								<td th:text="${itSystem.systemId}" />
+								<td th:text="${itSystem.name}" />
+								<td th:text="${itSystem.vendor}" />
+								<td class="text-center">
+									<a href="#" onclick="setItSystem(this);" th:attr="data-id=${itSystem.id}"><em class="fa fa-mail-forward"></em></a>
+								</td>
+							</tr>
+						</tbody	>
+					</table>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" onclick="clearItSystem();" th:text="#{html.control.button.clear}"></button>
+					<button type="button" class="btn btn-danger" data-dismiss="modal" th:text="#{html.control.button.cancel}"></button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div style="display:none;" th:if="${status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}">
+		<div th:each="requirementAnswer: ${vendorAnswerForm.requirementAnswers}"
+			 th:id="'desc'+ ${requirementAnswer.purchaseRequirementId}"
+			 th:attr="data-priority=#{__${T(dk.digitalidentity.re.dao.model.enums.Importance).valueOf(requirementAnswer.importance).value}__}"
+			 th:attrappend="data-choice=${requirementAnswer.choice}, data-price=${requirementAnswer.price}, data-detail=${requirementAnswer.detail}, data-inforequirement=${requirementAnswer.infoRequirement}"
+			 >
+				<div class="description" th:text="${requirementAnswer.description}"></div>
+				<div class="rationale" th:text="${requirementAnswer.rationale}"></div>
+				<div class="attachments" th:if="${not #lists.isEmpty(requirementAnswer.attachments)}">
+					<ul>
+						<li class="form-control-static" th:each="attachment : ${requirementAnswer.attachments}">
+							<em class="fa fa-fw fa-paperclip"></em>
+							<a th:text="${attachment.name}" th:href="${attachment.url}" ></a>
+						</li>
+					</ul>
+				</div>
+				<div class="localAttachments" th:if="${not #lists.isEmpty(requirementAnswer.localAttachments)}">
+					<ul>
+						<li class="form-control-static" th:each="attachment : ${requirementAnswer.localAttachments}">
+							<em class="fa fa-fw fa-paperclip"></em>
+							<a th:text="${attachment.name}" th:href="${attachment.url}" ></a>
+						</li>
+					</ul>
+				</div>
+		</div>
+	</div>
+	
+	<div th:replace="fragment/footer :: footer" />
+
+	<script th:replace="fragment/datatables :: datatables " />
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+			/*[+
+				var answerURI = [[@{/vendor/answer/}]];
+				var exitURI = [[@{/vendor/exit}]];
+				var YES = [[${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).YES}]];
+				var YES_AS_AN_ADDON = [[${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).YES_AS_AN_ADDON}]];
+				var YES_PARTIALLY = [[${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).YES_PARTIALLY}]];
+				var cancelTxt = [[#{html.control.button.no}]];
+				var confirmTxt = [[#{html.control.button.yes}]];
+				var askForPrice = [[${askForPrice}]];
+				var isInfoRequirement = [[${isInfoRequirement}]];
+				var swalConfirmExitTitle = [[#{html.vendor.exit.title}]];
+				var swalConfirmExitText = [[#{html.vendor.exit.text}]];
+
+				var validationRequired = [[#{html.error.jquery.required}]];
+				var validationMinChars = [[#{html.error.jquery.minchars}]];
+				
+				$.extend( $.validator.messages, {
+					required: validationRequired,
+					minlength: $.validator.format(validationMinChars)
+				});
+			+]*/
+
+			var token = $("meta[name='_csrf']").attr("content");
+
+			function openAnswerDialogue(obj) {
+				var id = $(obj).data('id');
+				var hiddenData = $("#desc"+id);
+				var description = hiddenData.find('.description').text();
+				var rationale = hiddenData.find(".rationale").text();
+				var priority = hiddenData.data("priority");
+				var infoRequirement = hiddenData.data("inforequirement");
+				var choice = hiddenData.data("choice");
+				var price = hiddenData.data("price");
+				var detail = hiddenData.data("detail");
+				var attachments = hiddenData.find('.attachments').html();
+				var localAttachments = hiddenData.find('.localAttachments').html();
+				
+				$('#answerModal').find('#adId').val(id);
+				$('#answerModal').find('#adDescription').text(description);
+				$('#answerModal').find('#adRationale').text(rationale);
+				$('#answerModal').find('#adPriority').val(priority);
+				$('#answerModal').find('#adChoice').val(choice);
+				$('#answerModal').find('#adChoice').change();
+				$('#answerModal').find('#adDetail').val(detail);
+				
+				if (localAttachments != null) {
+					$('#answerModal').find('#adAttachments').html(localAttachments);
+				}
+				else if (attachments != null) {
+					$('#answerModal').find('#adAttachments').html(attachments);
+				}
+				else {
+					$('#answerModal').find('#adAttachments').html("");
+				}
+
+				$('#answerModal').find('#adInfoRequirement').val(infoRequirement);
+
+				if (infoRequirement) {
+					$("#adDetail").rules('add', {
+						required: true,
+						minlength: 3
+					});
+				}
+
+				if (askForPrice) {
+					$('#answerModal').find('#adPrice').val(price);
+
+				}
+				
+				storeScrollPosition();
+				
+				$('#answerModal').modal("show");
+			}
+
+			//Fix for datatables in modals
+			$(document).on('shown.bs.modal', function (e) {
+				$.fn.dataTable.tables( {visible: true, api: true} ).columns.adjust();
+			});
+			
+		    var prefix = (window.location.host).split('_').join('');
+			function scrollToStoredPosition() {
+				setTimeout(function() {
+			        if (window.name.search('^'+prefix+'_(\\d+)_(\\d+)_') == 0) {
+			            var name = window.name.split('_');
+			            window.scrollTo(name[1], name[2]);
+			            window.name = name.slice(3).join('_');
+			        }
+				}, 10);
+			}
+
+			var pre_name;
+			function storeScrollPosition() {
+				if (typeof(pre_name) == 'undefined') {
+					pre_name = window.name;
+				}
+
+				// get the scroll positions
+			    var top = 0, left = 0;
+			    if (typeof(window.pageYOffset) == 'number') { // netscape
+			        top = window.pageYOffset, left = window.pageXOffset;
+			    }
+			    else if (document.body && (document.body.scrollLeft || document.body.scrollTop)) { // dom
+			        top = document.body.scrollTop, left = document.body.scrollLeft;
+			    }
+			    else if (document.documentElement && (document.documentElement.scrollLeft || document.documentElement.scrollTop)) { // ie6
+			        top = document.documentElement.scrollTop, left = document.documentElement.scrollLeft;
+			    }
+			    
+				// store the scroll
+			    if (top || left) {
+			    	window.name = prefix + '_' + left + '_' + top + '_' + pre_name;
+			   	}
+			}
+
+			function getScrollPosition() {
+				var top = 0;
+				
+				if (typeof(window.pageYOffset) == 'number') { // netscape
+					top = window.pageYOffset, left = window.pageXOffset;
+				}
+				else if (document.body && (document.body.scrollLeft || document.body.scrollTop)) { // dom
+					top = document.body.scrollTop, left = document.body.scrollLeft;
+				}
+				else if (document.documentElement && (document.documentElement.scrollLeft || document.documentElement.scrollTop)) { // ie6
+					top = document.documentElement.scrollTop, left = document.documentElement.scrollLeft;
+				}
+				
+				return top;
+			}
+			
+			$("document").ready(function() {
+				scrollToStoredPosition();
+				
+				/*[+
+			   			var searchTxt = [[#{html.datatables.search}]];
+			   			var dropdownTxt = [[#{html.datatables.dropdown}]];
+			   			var infoDefaultTxt = [[#{html.datatables.info.default}]];
+			   			var infoEmptyTxt = [[#{html.datatables.info.empty}]];
+			   			var infoFilteredTxt = [[#{html.datatables.info.filtered}]];
+			   			var prevTxt = [[#{html.datatables.prev}]];
+			   			var nextTxt = [[#{html.datatables.next}]];
+				+]*/
+		
+			    $('.itSystemListTable').DataTable({
+			        "paging":   true,
+			        "ordering": true,
+			        "info":     true,
+			        "stateSave": true,
+			        "lengthChange": false,
+			        "language": {
+			            "search":       searchTxt,
+			            "lengthMenu":   dropdownTxt,
+			            "info":         infoDefaultTxt,
+			            "zeroRecords":  infoEmptyTxt,
+			            "infoEmpty":    "",
+			            "infoFiltered": infoFilteredTxt,
+			            "paginate": {
+			            	"next": nextTxt,
+			            	"previous": prevTxt
+			            }
+			        }
+			    });
+
+				var form = $("#answerForm");
+				form.validate({
+					rules:{
+						adChoice: {
+							required: true
+						}
+					}
+				});
+
+				$("#exitBtn").click(function() {
+					swal({
+							title: swalConfirmExitTitle,
+							text : swalConfirmExitText,
+							type : "warning",
+							showCancelButton : true,
+							confirmButtonColor : "#DD6B55",
+							confirmButtonText : confirmTxt,
+							cancelButtonText : cancelTxt,
+							closeOnConfirm : true,
+							closeOnCancel : true
+						},
+						function(isConfirm) {
+							if (isConfirm) {
+								window.location.href = exitURI;
+							}
+						}
+					);
+				});
+
+				//when YES_PARTIALLY is selected add required to textbox
+				$("#adChoice").change(function(){
+					var value = $(this).val();
+
+					if ((value == "YES" || value == "YES_AS_AN_ADDON") && $("#adInfoRequirement").val() == 'true') {
+						$("#adDetail").rules('add', {
+							required: true,
+							minlength: 3
+						});
+					} else {
+						$("#adDetail").rules( "remove" );
+					}
+
+					if (value == "YES_PARTIALLY") {
+						$("#adDetail").rules('add', {
+							required: true,
+							minlength: 3
+						});
+					}
+
+					if (askForPrice && value == "YES_AS_AN_ADDON") {
+						$("#price-control").show();
+						$("#adPrice").rules('add', {
+							required: true
+						});
+					} else {
+						$("#price-control").hide();
+						$("#adPrice").rules( "remove" );
+					}
+				});
+				
+				$("#saveAnswerButton").click(function (){
+					if(form.valid()){
+						//collect input values
+						var id = $('#answerModal').find('#adId').val();
+						var choice = $('#adChoice').val();
+						var price = $('#adPrice').val();
+						var detail = $('#adDetail').val();
+						var payload = {};
+						payload.choice = choice;
+						payload.price = price;
+						payload.detail = detail;
+
+						//make ajax call
+						$.ajax({
+							type: "POST",
+							url: answerURI + id,
+							data: payload,
+							cache : false,
+							headers: {
+								'X-CSRF-TOKEN': token
+							},
+							success: function() {
+								window.location.href = '/vendor';
+							},
+							error : function(response) {
+								// on error
+								swal(response.responseText);
+							}
+						});
+					}
+				});				
+			});
+			
+			function clearItSystem(){
+				/*[+
+					var url = [[@{/vendor/clearitsystem/}]];
+				 +]*/
+				$.ajax({
+					type: "POST",
+					url: url,
+					headers: {
+						'X-CSRF-TOKEN': token
+					},
+					success: function() {
+						window.location.href = '/vendor';
+					},
+					error : function(response) {
+						// on error
+						swal(response.responseText);
+					}
+				});
+			}
+			
+			function setItSystem(obj) {
+				var id = $(obj).data('id');
+
+				/*[+
+					var url = [[@{/vendor/setitsystem/}]];
+				 +]*/
+	
+				$.ajax({
+					type: "POST",
+					url: url+id,
+					headers: {
+						'X-CSRF-TOKEN': token
+					},
+					success: function() {
+						window.location.href = '/vendor';
+					},
+					error : function(response) {
+						// on error
+						swal(response.responseText);
+					}
+				});
+			}
+		/*]]>*/
+	</script>
+</body>
+</html>

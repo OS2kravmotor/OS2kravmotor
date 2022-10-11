@@ -1,0 +1,3 @@
+jython must be installed to run these scripts
+
+$ sudo apt-get install jython

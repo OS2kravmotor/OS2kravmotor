@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'purchases')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<h3 th:text="#{html.answer.view.answerfrom} + ' ' + ${answer.name}" />
+							</div>
+						</div>
+	
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="form-group">
+									<label class="col-sm-2 control-label" th:text="#{html.purchase.itsystem}" />
+									<div class="col-sm-10">
+										<span th:text="${answer.itSystem}!=null ? (${answer.itSystem.name}+' ('+${answer.itSystem.vendor}+')') : #{html.vendor.itsystem.notset}" />
+									</div>
+								</div>
+							</div>
+	
+							<div class="col-lg-12" th:if="${answer.itSystem} != null">
+								<div class="form-group">
+									<label class="col-sm-2 control-label" th:text="#{html.kitos.url}" />
+									<div class="col-sm-10">
+										<a target="_blank" th:href="${@environment.getProperty('kitos.base.url')}+${answer.itSystem.systemId} + '/main'" th:text="${@environment.getProperty('kitos.base.url')}+${answer.itSystem.systemId} + '/main'"></a>
+										<span th:text="#{html.control.a.open.new.tab}"></span>
+									</div>
+								</div>
+							</div>
+						</div>
+	
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="table-responsive">
+									<table class="listTable table table-striped table-hover">
+										<thead>
+											<tr>
+												<th class="col-md-2" th:text="#{html.answer.requirement}" />
+												<th class="col-md-3" th:text="#{html.answer.description}" />
+												<th class="col-md-1" th:text="#{html.answer.category}" />
+												<th class="col-md-1" th:text="#{html.answer.priority}" />
+												<th class="col-md-1" th:text="#{html.answer.answer}" />
+												<th th:if="${showPrice}" class="col-md-1" th:text="#{html.answer.price}" />
+												<th th:class="${showPrice} ? 'col-md-3' : 'col-md-4'" th:text="#{html.answer.answerdetail}" />
+											</tr>
+										</thead>
+	
+										<tbody>
+											<tr th:each="answerDetail : ${answerDetails}">
+												<td th:text="${answerDetail.requirement.name}" />
+												<td class="preformat" th:text="${answerDetail.requirement.description}" />
+												<td th:text="${answerDetail.requirement.category.name}" />
+												<td th:text="#{__${answerDetail.requirement.importance.value}__}" />
+												<th:block th:if="${answerDetail.choice} == null">
+													<td/>
+												</th:block>
+												<th:block th:if="${answerDetail.choice} != null">
+													<td th:text="#{__${answerDetail.choice.displayName}__}" />
+												</th:block>
+												<td th:if="${showPrice}" th:text="${answerDetail.price}" />
+												<td class="preformat" th:text="${answerDetail.detail}" />
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer" />
+
+	<script th:replace="fragment/datatables :: datatables " />
+</body>
+</html>

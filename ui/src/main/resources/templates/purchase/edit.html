@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'purchases.new')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<h3 th:if="${#strings.toString(purchase.status)}!='COMPLETED'">
+					<a class="btn btn-default" th:if="${#strings.toString(purchase.status)}=='DRAFT'" id="addCustomRequirementButton" href="#" data-toggle="modal" data-target="#addCustomRequirementModal">
+						<i class="fa fa-plus" style="margin-right: 10px;"></i>
+						<span th:text="#{html.purchase.edit.head.button.add.customrequirement}" />
+					</a>
+					<!-- Old vendor model check -->
+					<span th:if="${oldVendorModel==false}">
+					<a class="btn btn-default" th:if="${#strings.toString(purchase.status)}=='ACTIVE'" id="inviteVendorModalButton" href="#" data-toggle="modal" data-target="#inviteVendorModal">
+						<i class="fa fa-envelope" style="margin-right: 10px;"></i>
+						<span th:text="#{html.purchase.edit.head.button.invite.vendor}" />
+					</a>
+					</span>
+					<a th:if="${#strings.toString(purchase.status)}=='DRAFT'" id="activateProject" class="btn btn-default" href="#">
+						<i class="fa fa-check-circle-o" style="margin-right: 10px;"></i>
+						<span th:text="#{html.purchase.edit.head.button.status.activate}" />
+					</a>
+					<a th:if="${#strings.toString(purchase.status)}=='DRAFT' or ${#strings.toString(purchase.status)}=='ACTIVE'" id="cancelProject" class="btn btn-default" href="#">
+						<i class="fa fa-ban" style="margin-right: 10px;"></i>
+						<span th:text="#{html.purchase.edit.head.button.status.cancel}" />
+					</a>
+					<a th:if="${#strings.toString(purchase.status)}=='DRAFT' or ${#strings.toString(purchase.status)}=='ACTIVE'" id="saveProject" class="btn btn-default" href="/purchase/list">
+						<i class="fa fa-save" style="margin-right: 10px;"></i>
+						<span th:text="#{html.control.button.save}" />
+					</a>
+				</h3>
+
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<form id="purchase-form" class="form-horizontal" th:object="${purchase}">
+									<input th:field="*{id}" type="hidden"/>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.id}"/>
+											<div class="col-sm-8">
+												<input th:value="${purchase.id}" class="form-control" readonly="readonly"/>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.title} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.title}"></em>
+											</label>
+											<div class="col-sm-8">
+												<input th:field="*{title}" class="form-control" th:readonly="*{status.value}!='enum.status.draft'"/>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.description} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.description}"></em>
+											</label>
+											<div class="col-sm-8">
+												<div th:if="*{status.value} != 'enum.status.draft'" th:text="*{description}" class="preformat form-control" style="height: auto !important;" th:readonly="readonly"/>
+												<textarea th:if="*{status.value} == 'enum.status.draft'" rows="8" th:field="*{description}" class="form-control" />
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.email} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.email}"></em>
+											</label>
+											<div class="col-sm-8">
+												<input th:field="*{email}" class="form-control" th:readonly="*{status.value}!='enum.status.active' and *{status.value}!='enum.status.draft'"/>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.deadline} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.deadline}"></em>
+											</label>
+											<div class="col-sm-8">
+												<input type="text" th:field="*{endTime}" class="form-control" />
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.status}"/>
+											<div class="col-sm-8">
+												<input th:value="#{__*{status.value}__}" class="form-control" readonly="readonly" />
+											</div>
+										</div>
+									</fieldset>
+	
+									<!--TODO pso: add new purchase winner id to database and add support for new vendor model-->
+									<fieldset th:if="${#strings.toString(purchase.status) == 'COMPLETED' or #strings.toString(purchase.status) == 'ARCHIVED'}">
+										<div class="form-group blu-margin">
+											<label class="col-sm-2 control-label" th:text="#{html.purchase.winner}"/>
+											<div class="col-sm-8">
+												<!--*** OLD VendorModel ***-->
+												<select th:if="${oldVendorModel==true}" class="form-control" th:field="*{winner}">
+													<option value="0" th:text="#{html.purchase.list.select.winner}" ></option>
+													<option th:each="answer : ${answers}" th:value="${answer.id}" th:text="${answer.name}"></option>
+												</select>
+												<!--*** NEW VendorModel ***-->
+												<select th:if="${oldVendorModel==false}" class="form-control" th:field="*{winnerPurchaseAnswer}">
+													<option value="0" th:text="#{html.purchase.list.select.winner}" ></option>
+													<option th:each="purchaseAnswer : *{purchaseAnswers}" th:value="${purchaseAnswer.id}" th:text="${purchaseAnswer.vendorOrganization.domain}"></option>
+												</select>
+											</div>
+										</div>
+									</fieldset>
+	
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.domain} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.domain}"></em>
+											</label>
+											<div class="col-sm-8">
+												<ul>
+													<li style="padding-left: 16px;" th:each="domain : *{domains}" th:value="${domain.id}" th:text="${domain.name}" ></li>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.requirementPriorityEnabled} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.requirementPriorityEnabled}"></em>
+											</label>
+											<div class="col-sm-8">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input type="checkbox" id="requirementPriorityEnabled" name="requirementPriorityEnabled" th:checked="*{requirementPriorityEnabled}" th:disabled="*{status.value}!='enum.status.draft'"/>
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<div class="btn-group">
+											<button type="button" style="width: auto !important;" class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown">
+												<em class="fa fa-fw fa-cog"></em>
+												<span th:text="#{html.datatables.switch}"></span>
+											</button>
+											
+											<ul class="dropdown-menu" role="menu" id="dataTableDropdown">
+												<li id="priorityToggleBtn" th:hidden="!*{requirementPriorityEnabled}"><a href="#" data-cid="2" onclick="return dataTablesToggleColumn(this);"><em class="fa fa-fw"></em><span th:text="#{html.purchase.importance}" /></a></li>
+												<li><a href="#" data-cid="3" onclick="return dataTablesToggleColumn(this);"><em class="fa fa-fw"></em><span th:text="#{html.requirement.origin}" /></a></li>
+												<li><a href="#" data-cid="4" onclick="return dataTablesToggleColumn(this);"><em class="fa fa-fw"></em><span th:text="#{html.requirement.category}" /></a></li>
+												<li><a href="#" data-cid="5" onclick="return dataTablesToggleColumn(this);"><em class="fa fa-fw"></em><span th:text="#{html.purchase.description}" /></a></li>
+											</ul>
+										</div>
+										<div class="col-sm-12">
+											<h3 th:text="#{html.purchase.view.standardrequirements}" />
+	
+											<table id="listTable" class="listTable table table-striped table-hover searchable-table">
+												<thead>
+													<tr>
+														<th class="col-md-1" th:text="#{html.purchase.enable}" />
+														<th class="col-md-2" th:text="#{html.purchase.view.requirements}" />
+														<th class="col-md-1" th:text="#{html.purchase.importance}" />
+														<th class="col-md-1" th:text="#{html.requirement.origin}" />
+														<th class="col-md-1" th:text="#{html.requirement.category}" />
+														<th class="col-md-6" th:text="#{html.purchase.description}" />
+													</tr>
+												</thead>
+	
+												<tbody>
+													<tr th:each="requirement: ${requirements}">
+														<td>
+															<div class="checkbox c-checkbox" style="width: 100% !important;">
+																<label>
+																	<input th:id="${requirement.id}" th:onclick="if (this.getAttribute('data-performonclick') == 'true') { handleCheckboxChange(this); }"
+																		   th:data-performonclick="${#strings.toString(purchase.status)}=='DRAFT' ? 'true' : 'false'"
+																	       th:attr="data-importance=${requirement.importance},data-purchaserequirementid=${requirement.purchaseRequirementId}" type="checkbox" th:checked="${requirement.selected}"
+																	       th:disabled="${(onlyEditorsCanRemoveMinimumRequirements==true and requirement.selected==true and isEditor==false and requirement.importance==T(dk.digitalidentity.re.dao.model.enums.Importance).ABSOLUTE) or #strings.toString(purchase.status)!='DRAFT'}"/>
+																	<span class="fa fa-check"></span>
+																</label>
+															</div>
+														</td>
+														<td>
+															<span th:text="${requirement.name}"></span>
+	                                                        <span style="margin-bottom: 0px !important;">
+	                                                            <a th:if="${requirement.helpText} != null" href="#" rel="popover" data-html="true" data-placement="right" data-toggle="popover" data-trigger="hover" th:title="#{pdf.purchase.view.helpText}" th:attr="data-content='<pre>'+${requirement.helpText}+'</pre>'" onclick="return false;">
+	                                                                <em class="fa fa-lg fa-question-circle"></em>
+	                                                            </a>
+	                                                        </span>
+														</td>
+														<td>
+															<span th:id="'req-prio-span-' + ${requirement.id}" th:text="#{__${requirement.importance.value}__}"
+															      th:attr="data-importance=${requirement.importance}"
+															      th:style="${requirement.selected and #strings.toString(purchase.status) == 'DRAFT' and (#strings.toString(requirement.importance) != 'ABSOLUTE' or onlyEditorsCanRemoveMinimumRequirements == false or isEditor)} ? 'display: none;' : ''" />
+															<select th:id="'req-prio-select-' + ${requirement.id}" class="form-control"
+																	th:attr="data-importance=${requirement.importance}"
+																	th:style="${requirement.selected and #strings.toString(purchase.status) == 'DRAFT' and (#strings.toString(requirement.importance) != 'ABSOLUTE' or onlyEditorsCanRemoveMinimumRequirements == false or isEditor)} ? '' : 'display: none;'"
+																	onchange="changePriority(this);">
+																<option class="form-control"
+																	th:each="type : ${T(dk.digitalidentity.re.dao.model.enums.Importance).values()}"
+																	th:value="${type}" th:text="#{__${type.value}__}"
+																	th:selected="${type == requirement.importance}" />
+															</select>
+														</td>
+														<td th:text="#{__${requirement.requirementType.message}__}" />
+														<td>
+															<div th:text="${requirement.categoryRichObject?.name}"></div>
+															<div th:if="${requirement.subcategoryName != null}" th:text="${requirement.subcategoryName}" style="font-size: smaller; color: black;"></div>
+														</td>
+														<td th:data-requirementid="${requirement.id}" th:data-purchaserequirementid="${requirement.purchaseRequirementId}" style="vertical-align: top;">
+															<div class="col-sm-10">
+																<input class="originalDescription" type="hidden" th:value="${requirement.originalDescription}">
+																<span class="preformat displayDescription" th:text="${requirement.description}"></span>
+																<textarea class="form-control editDescription" style="width: 100%; display: none;" th:text="${requirement.description}"></textarea>
+															</div>
+															<div class="col-sm-2">
+																<em class="fa fa-fw fa-pencil edit" th:style="${requirement.selected==true && #strings.toString(purchase.status)=='DRAFT'} ? '' : 'display: none;'" onclick="editDescription(this)"></em>
+																<em class="fa fa-fw fa-save save" style="display: none;" onclick="saveDescription(this)"></em>
+																<em class="fa fa-fw fa-times cancel" style="display: none;" onclick="cancelDescription(this)"></em>
+															</div>
+														</td>
+													</tr>
+												</tbody	>
+											</table>
+										</div>
+									</fieldset>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<!-- modal add custom requirement -->
+	<div id="addCustomRequirementModal" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title" th:text="#{html.purchase.addcustom}" />
+				</div>
+				<form class="form-horizontal" method="post" th:action="@{/purchase/{purchaseId}/addcustomrequirement(purchaseId=${purchase.id})}" id="addCustomRequirementForm" th:object="${customRequirement}">
+					<div class="modal-body">
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" th:text="#{html.requirement.name}" />
+								<div class="col-sm-10">
+									<input th:field="*{name}" id="crfName" class="form-control" />
+									<ul th:if="${#fields.hasErrors('name')}" class="error">
+										<li class="error" th:each="err : ${#fields.errors('name')}" th:text="${err}"/>
+									</ul>
+								</div>
+							</div>
+						</fieldset>
+	
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" th:text="#{html.requirement.category}" />
+								<div class="col-sm-10">
+									<select th:field="*{category}" class="form-control">
+										<option class="form-control" th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}" />
+									</select>
+								</div>
+							</div>
+						</fieldset>
+	
+						<fieldset id="customRequirementImportance">
+							<div class="form-group">
+								<label class="col-sm-2 control-label" th:text="#{html.requirement.importance}" />
+								<div class="col-sm-10">
+									<select th:field="*{importance}" class="form-control">
+										<option
+											th:each="type : ${T(dk.digitalidentity.re.dao.model.enums.Importance).values()}"
+											th:value="${type}" th:text="#{__${type.value}__}"
+											th:selected="${type} == *{importance}" />
+									</select>
+								</div>
+							</div>
+						</fieldset>
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" th:text="#{html.requirement.description}" />
+								<div class="col-sm-10">
+									<textarea rows="8" th:field="*{description}" class="form-control" />
+									<ul th:if="${#fields.hasErrors('description')}" class="error">
+										<li class="error" th:each="err : ${#fields.errors('description')}" th:text="${err}"/>
+									</ul>
+								</div>
+							</div>
+						</fieldset>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary" th:text="#{html.control.button.save}"/>
+						<button type="button" class="btn btn-danger" data-dismiss="modal" th:text="#{html.control.button.close}"/>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<!-- end modal -->
+	
+	<!-- modal invite vendor -->
+	<div id="inviteVendorModal" class="modal fade" role="dialog">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title" th:text="#{html.purchase.page.invitevendor}" />
+				</div>
+	
+				<form class="form-horizontal" id="inviteVendorForm" th:object="${inviteVendorForm}" th:action="@{/purchase/edit/}+${purchase.id}+'/inviteVendor'" method="post">
+					<div class="modal-body">
+
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" th:text="#{html.purchase.vendor.email}" />
+								<div class="col-sm-10">
+									<input th:field="*{email}" class="form-control" />
+									<ul th:if="${#fields.hasErrors('email')}" class="error">
+										<li class="error" th:each="err : ${#fields.errors('email')}" th:text="${err}"/>
+									</ul>
+								</div>
+							</div>
+						</fieldset>
+
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" th:text="#{html.entity.email_template.title}" />
+								<div class="col-sm-10">
+									<input name="title" th:value="*{title}" th:maxlength="50" class="form-control" />
+								</div>
+							</div>
+						</fieldset>
+	
+						<fieldset>
+							<div class="form-group">
+								<label class="col-sm-2 control-label" th:text="#{html.purchase.page.invite.vendor.custom.message}" />
+								<div class="col-sm-10">
+									<textarea rows="12" th:field="*{message}" class="form-control mb-0 preformat" style="max-width: 100%;" />
+									<ul th:if="${#fields.hasErrors('message')}" class="error">
+										<li class="error" th:each="err : ${#fields.errors('message')}" th:text="${err}"/>
+									</ul>
+								</div>
+							</div>
+						</fieldset>
+					</div>
+
+					<div class="modal-footer">
+						<button type="submit" id="inviteVendorButton" class="btn btn-primary" th:text="#{html.control.button.send.invite}" />
+						<button type="button" class="btn btn-danger" data-dismiss="modal" th:text="#{html.control.button.close}"/>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<!-- end modal -->
+
+	<style>
+		body > div.sweet-alert.showSweetAlert.visible > fieldset > div.sa-input-error {
+			display:none !important;
+		}
+		em.fa-question {
+			margin-right: -18px;
+		}
+		div.popover-content > pre {
+			display: block;
+			padding: 10px;
+			margin: 0 0 10.5px;
+			font-size: 14px;
+			font-family: inherit;
+			line-height: 21.4px;
+			word-break: break-all;
+			color: #656565 !important;
+			background-color: transparent;
+			border: 0;
+			border-radius: 0px;
+			white-space: -moz-pre-wrap; /* Mozilla, supported since 1999 */
+			white-space: -pre-wrap; /* Opera */
+			white-space: -o-pre-wrap; /* Opera */
+			white-space: pre-wrap; /* CSS3 - Text module (Candidate Recommendation) http://www.w3.org/TR/css3-text/#white-space */
+			word-wrap: break-word; /* IE 5.5+ */
+		}
+	</style>
+
+	<div th:replace="fragment/footer :: footer" />
+
+	<script th:replace="fragment/datatables :: datatables " />
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+		/*[+
+			var cancelTxt = [[#{html.control.button.no}]];
+			var confirmTxt = [[#{html.control.button.yes}]];
+			var url = [[@{/purchase/}]];
+			var purchaseId = [[${purchaseid}]];
+			var purchaseStatus = [[${#strings.toString(purchase.status)}]];
+			var fieldUpdatedMsg = [[#{html.purchase.updatedmsg}]];
+			var fieldNotUpdatedMsg = [[#{html.purchase.failedupdate}]];
+			var inviteSentMsg= [[#{html.purchase.inviteSentMsg}]];
+			var inviteNotSentMsg = [[#{html.purchase.inviteNotSentMsg}]];
+			
+			var validationErrorMsgs = {
+				title : [[#{html.error.purchase.validation.title}]],
+				description : [[#{html.error.purchase.validation.description}]],
+				email : [[#{html.error.purchase.validation.email}]],
+				endTime : [[#{html.error.purchase.validation.endTime}]],
+				endTimeFormat : [[#{html.error.purchase.validation.endTimeFormat}]]
+			};
+			
+			var isEditor = [[${isEditor}]];
+			var onlyEditorsCanRemoveMinimumRequirements = [[${onlyEditorsCanRemoveMinimumRequirements}]];
+			var swalDeleteTitle = [[#{html.purchase.edit.swal.delete.title}]];
+			var swalDeleteText = [[#{html.purchase.edit.swal.delete.text}]];
+			var swalFromAbsoluteTitle = [[#{html.purchase.edit.swal.fromabsolute.title}]];
+			var swalFromAbsoluteText = [[#{html.purchase.edit.swal.fromabsolute.text}]];
+			var swalToAbsoluteTitle = [[#{html.purchase.edit.swal.toabsolute.title}]];
+			var swalToAbsoluteText = [[#{html.purchase.edit.swal.toabsolute.text}]];
+			var swalToAbsoluteForPurchaserText = [[#{html.purchase.edit.swal.toabsoluteforpuchaser.text}]];
+		 	var swalCancelTitle = [[#{html.purchase.edit.swal.cancel.title}]];
+		 	var swalCancelText = [[#{html.purchase.edit.swal.cancel.text}]];
+		 	var swalCancelReasonFail = [[#{html.purchase.edit.swal.cancel.reason.fail}]];
+		 	var cancelReason = [[#{html.purchase.edit.swal.cancel.reason}]];
+		 	var swalActivateTitle = [[#{html.purchase.edit.swal.activate.title}]];
+		 	var swalActivateText = [[#{html.purchase.edit.swal.activate.text}]];
+		 	var changingStatusErrorTitle = [[#{html.purchase.edit.swal.activate.error.title}]];
+		 	var changingStatusErrorText = [[#{html.purchase.edit.swal.activate.error.text}]];
+		 	var swalSureChangeDeadlineTitle = [[#{html.purchase.edit.swal.change.deadline.title}]];
+		 	var swalSureChangeDeadlineText = [[#{html.purchase.edit.swal.change.deadline.text}]];
+		 	var swalSureChangeDeadlineReasonFail = [[#{html.purchase.edit.swal.change.deadline.reason.fail}]];
+		 	var deadlineReason = [[#{html.purchase.edit.swal.change.deadline.reason}]];
+
+			var swalImageOk = [[#{html.control.button.confirm}]];
+			var swalImageTitle = [[#{html.email_template.swal.image.title}]];
+			var swalImageText = [[#{html.email_template.swal.image.text}]];
+			
+			var requirements = [[${requirements}]]
+		+]*/
+		var token = $("meta[name='_csrf']").attr("content");
+		var currentTable;
+		var columnImportance;
+
+		$("document").ready(function() {
+			$('#endTime').datetimepicker({
+				locale: 'da',
+				format: 'YYYY/MM/DD - HH:mm',
+				icons : {
+						time: 'fa fa-clock-o',
+						date: 'fa fa-calendar',
+						up: 'fa fa-chevron-up',
+						down: 'fa fa-chevron-down',
+						previous: 'fa fa-chevron-left',
+						next: 'fa fa-chevron-right',
+						today: 'fa fa-crosshairs',
+						clear: 'fa fa-trash-o',
+						close: 'fa fa-times'
+					},
+				useCurrent: false
+			});
+
+			$('textarea[name="message"]').summernote({
+				"height": 240,
+				"toolbar": [
+					[ "font", [ "bold", "italic", "underline" ]],
+					[ "para", [ "ul", "ol" ]],
+					[ "insert", [ "link" ]]
+				],
+				callbacks: {
+					onImageUploadError: function(msg) {
+						swal({
+							title: swalImageTitle,
+							text: swalImageText,
+							confirmButtonColor : "#4765a0",
+							confirmButtonText : swalImageOk
+						});
+					}
+				},
+				dialogsInBody: false
+			});
+
+			$('[rel=popover]').popover();
+
+			$("#purchase-form > fieldset > .form-group > div > .form-control:not([readonly])").on('focusin', function(){
+				$(this).data('val', $(this).val());
+			}).on('change', function(){
+				var prev = $(this).data('val');
+				var current = $(this).val();
+				handleChangeOnInput($(this).attr("id") , prev);
+			});
+			
+			$("#requirementPriorityEnabled").on('change', function(){
+				handleChangeOnCheckbox("requirementPriorityEnabled");
+				
+				// handle show/hide priority
+				handlePriority();
+			});
+			
+			// init show/hide priority
+			handlePriority();
+
+			$("#endTime").on("dp.hide", function(e) {
+				var prev = $(this).data('val');
+				var current = $(this).val();
+				if(prev == current){
+					return;
+				}
+				if(purchaseStatus == "ACTIVE" || purchaseStatus == "COMPLETED"){
+					swal({
+							html : true,
+							title: swalSureChangeDeadlineTitle,
+							text : swalSureChangeDeadlineText + "<br/><br/><label>Besked til leverandører:</label><br/>" + "<textarea class=\"form-control\" rows=\"5\" style=\"margin-top: 10px; width:100%;\" id='reasonText'></textarea>",
+							type: "warning",
+							showCancelButton : true,
+							confirmButtonColor : "#DD6B55",
+							confirmButtonText : confirmTxt,
+							cancelButtonText : cancelTxt,
+							closeOnConfirm : false,
+							closeOnCancel : true
+						},
+						function(isConfirm) {
+							if (isConfirm) {
+								var val = document.getElementById('reasonText').value;
+								if (val === "") {
+									swal.showInputError(swalSureChangeDeadlineReasonFail);
+									return false;
+								}
+								handleChangeOnInput("endTime" , prev, val);
+								swal.close();
+							}else{
+								$("#endTime").data("DateTimePicker").date(prev);
+							}
+						}
+					);
+				}else{
+					handleChangeOnInput("endTime" , prev);
+				}
+			});
+			
+			$("#endTime").on("dp.change", function (e) {
+				if($(this).data('val') == ''){
+					$(this).data('val', e.oldDate);
+				}
+			});
+
+			$('#addCustomRequirementModal').on('shown.bs.modal', function () {
+				$('#crfName').focus();
+			});
+			
+			$('#inviteVendorModal').on('shown.bs.modal', function () {
+				$('#ivfName').focus();
+			});
+
+			if ($("#addCustomRequirementModal").find(".error").length > 0){
+				$('#addCustomRequirementModal').modal("show");
+			}
+
+			if ($("#inviteVendorModal").find(".error").length > 0) {
+				$('#inviteVendorModal').modal("show");
+			}
+
+			$("#activateProject").on('click', function(e){
+				e.preventDefault();
+				changeStatus("ACTIVE");
+			});
+
+			$("#cancelProject").on('click', function(e){
+				e.preventDefault();
+				changeStatus("CANCELLED");
+			});
+
+			$('.openConfirmDeleteDialog').on("click", function(e){
+				e.preventDefault();
+
+				var url = $(this).data('url');
+				/*[+
+				 var titleTxt = [[#{html.requirement.list.delete.confirm.title}]];
+				 var bodyTxt = [[#{html.requirement.list.delete.confirm.body}]];
+				 +]*/
+
+				swal({
+						html: true,
+						title: titleTxt,
+						text : bodyTxt,
+						type : "warning",
+						showCancelButton : true,
+						confirmButtonColor : "#DD6B55",
+						confirmButtonText : confirmTxt,
+						cancelButtonText : cancelTxt,
+						closeOnConfirm : true,
+						closeOnCancel : true
+					},
+
+					function(isConfirm) {
+						if (isConfirm) {
+							window.location.href = url;
+						}
+					}
+				);
+			});
+			
+			currentTable = $('#listTable').DataTable();
+			columnImportance = currentTable.column(2);
+			columnImportance.visible(false);
+			dataTablesRefreshIcons($('#dataTableDropdown'));
+		});
+		
+		function removeRequirement(element) {
+			var targetUrl;
+
+			if (element.id == 0) {
+				// custom requirement
+				targetUrl = url + purchaseId + '/customrequirement/' + element.dataset.purchaserequirementid;
+			}
+			else {
+				// standard requirement
+				targetUrl = url + purchaseId + '/requirement/' + element.id;
+			}
+
+			$.ajax({
+				url : targetUrl,
+				method : 'DELETE',
+				cache : false,
+				headers: {
+					'X-CSRF-TOKEN': token
+				},
+				error : function(response) {
+					$.notify(fieldNotUpdatedMsg, {
+						status : 'danger',
+						pos : 'top-right'
+					});
+				},
+				success : function(response) {
+					$.notify(fieldUpdatedMsg, {
+						status : 'success',
+						pos : 'top-right'
+					});
+					
+					// update datatables
+					if (element.id == 0) {
+						$(".listTable").DataTable().row($(element).parents('tr')).remove().draw();
+					}
+					else {
+						var hidden = false;
+						if (columnImportance.visible() == false) {
+							hidden = true;
+							columnImportance.visible(true);
+						}
+						$('#req-prio-select-' + element.id).hide();
+						$('#req-prio-span-' + element.id).show();
+						
+						var selectedValue = $('#req-prio-span-' + element.id).data("importance");
+						$('#req-prio-select-' + element.id).data('importance', selectedValue);
+						if (hidden) {
+							columnImportance.visible(false);
+						}
+					}
+					var editBtn = $(element).closest('tr[role="row"]').find("em.edit");
+					var span = $(element).closest('tr[role="row"]').find(".displayDescription");
+					var source = $(element).closest('tr[role="row"]').find(".originalDescription").val();
+					span.text(source);
+					toggleDescriptionEdit(editBtn, false);
+					//hide must be after toggle becuase it will show the edit button
+					editBtn.hide();
+				}
+			});
+		}
+
+		function changePriority(obj) {
+			var element = obj;
+			var requirementId = element.id.substring("req-prio-select-".length);
+			var chosenPriority = $(obj).val();
+			var previousPriority = $(obj).data('importance');
+			
+			// see if the user really really really means it ;)
+			if (previousPriority == 'ABSOLUTE') {
+				swal({
+					html: true,
+					title: swalFromAbsoluteTitle,
+					text : swalFromAbsoluteText,
+					type : "warning",
+					showCancelButton : true,
+					confirmButtonColor : "#DD6B55",
+					confirmButtonText : confirmTxt,
+					cancelButtonText : cancelTxt,
+					closeOnConfirm : true,
+					closeOnCancel : true
+				},
+				function(isConfirm) {
+					if (isConfirm) {
+						performPriorityChange(element, requirementId, chosenPriority, previousPriority);
+					}
+					else {
+						$(element).val(previousPriority);
+					}
+				});
+			}
+			else if (chosenPriority == 'ABSOLUTE') {
+				var cText = (onlyEditorsCanRemoveMinimumRequirements && !isEditor) ? swalToAbsoluteForPurchaserText : swalToAbsoluteText;
+
+				swal({
+					html: true,
+					title: swalToAbsoluteTitle,
+					text : cText,
+					type : "warning",
+					showCancelButton : true,
+					confirmButtonColor : "#DD6B55",
+					confirmButtonText : confirmTxt,
+					cancelButtonText : cancelTxt,
+					closeOnConfirm : true,
+					closeOnCancel : true
+				},
+				function(isConfirm) {
+					if (isConfirm) {
+						performPriorityChange(element, requirementId, chosenPriority, previousPriority);
+					}
+					else {
+						$(element).val(previousPriority);
+					}
+				});
+			}
+			else {
+				performPriorityChange(element, requirementId, chosenPriority, previousPriority);
+			}
+		}
+		
+		function performPriorityChange(obj, requirementId, chosenPriority, previousPriority) {
+			var element = obj;
+
+			$.ajax({
+				url : url + purchaseId + '/setPriority/' + requirementId + '/' + chosenPriority,
+				method : 'POST',
+				cache : false,
+				headers: {
+					'X-CSRF-TOKEN': token
+				},
+				error : function(response) {
+					$.notify(fieldNotUpdatedMsg, {
+						status : 'danger',
+						pos : 'top-right'
+					});
+
+					$(element).data('importance', previousPriority);
+				},
+				success : function(response) {
+					$.notify(fieldUpdatedMsg, {
+						status : 'success',
+						pos : 'top-right'
+					});
+
+					$(element).data('importance', chosenPriority);
+
+					if (onlyEditorsCanRemoveMinimumRequirements && !isEditor && chosenPriority == "ABSOLUTE") {
+						$('#req-prio-select-' + requirementId).hide();
+						$('#req-prio-span-' + requirementId).show();
+						$('#req-prio-span-' + requirementId).text($('#req-prio-select-' + requirementId  + ' option:selected').text());
+						$('#req-prio-select-' + requirementId).closest('tr').find('input:checkbox').attr('disabled', true);
+					}
+				}
+			});
+		}
+
+		function handleCheckboxChange(obj) {
+			var element = obj;
+			if (element.checked) {
+				$.ajax({
+					url: url + purchaseId + '/requirement/' + element.id,
+					method : 'PUT',
+					cache : false,
+					headers: {
+						'X-CSRF-TOKEN': token
+					},
+					error : function(response) {
+						$.notify(fieldNotUpdatedMsg, {
+							status : 'danger',
+							pos : 'top-right'
+						});
+					},
+					success : function(response) {
+						$.notify(fieldUpdatedMsg, {
+							status : 'success',
+							pos : 'top-right'
+						});
+
+						var editBtn = $(element).closest('tr[role="row"]').find("em.edit");
+						editBtn.show();
+						
+						if (onlyEditorsCanRemoveMinimumRequirements && element.dataset.importance == "ABSOLUTE" && !isEditor) {
+							element.disabled = true;
+						}
+						else {
+							var hidden = false;
+							if (columnImportance.visible() == false) {
+								hidden = true;
+								columnImportance.visible(true);
+							}
+							var selectedValue = $('#req-prio-span-' + element.id).data("importance");
+							$('#req-prio-span-' + element.id).hide();
+							$('#req-prio-select-' + element.id).show();
+							$('#req-prio-select-' + element.id).val(selectedValue);
+							
+							if (hidden) {
+								columnImportance.visible(false);
+							}
+						}
+					}
+				});
+			}
+			else {
+				if (element.dataset.importance == "ABSOLUTE") {
+					swal({
+						html: true,
+						title: swalDeleteTitle,
+						text : swalDeleteText,
+						type : "warning",
+						showCancelButton : true,
+						confirmButtonColor : "#DD6B55",
+						confirmButtonText : confirmTxt,
+						cancelButtonText : cancelTxt,
+						closeOnConfirm : true,
+						closeOnCancel : true
+					},
+					function(isConfirm) {
+						if (isConfirm) {
+							removeRequirement(element);
+						}
+						else {
+							element.checked = !element.checked;
+						}
+					});
+				}
+				else {
+					removeRequirement(element);
+				}
+			}
+		}
+
+		function handleChangeOnInput(field , oldValue, message) {
+			var objId = $("#id").val();
+			var obj = $("#"+field).val();
+			var token = $("meta[name='_csrf']").attr("content");
+			var updateFieldsUrl = url + objId + '/update/'+ field ;
+
+			var payload = {
+				field: obj,
+				message: message
+			};
+
+			$.ajax({
+				url: updateFieldsUrl,
+				method: 'POST',
+				data: JSON.stringify(payload),
+				contentType: "application/json;",
+				headers: {
+					'X-CSRF-TOKEN': token
+				},
+				error: function(response) {
+					var errorMsg = validationErrorMsgs[response.responseText];
+					$.notify(errorMsg, {
+						status : 'danger',
+						pos : 'top-right'
+					});
+					if(field == "endTime"){
+						$("#"+field).data("DateTimePicker").date(oldValue);
+					}else{
+						$("#"+field).val(oldValue);
+					}
+				},
+				success: function(response) {
+					if(field == "endTime"){
+						$("#endTime").val(obj);
+						$("#"+field).data("DateTimePicker").date(obj);
+					}
+					$.notify(fieldUpdatedMsg, {
+						status : 'success',
+						pos : 'top-right'
+					});
+				}
+			});
+		}
+		
+		function handleChangeOnCheckbox(field) {
+			var objId = $("#id").val();
+			var obj = $("#"+field).prop("checked");
+			var token = $("meta[name='_csrf']").attr("content");
+			var updateFieldsUrl = url + objId + '/update/'+ field ;
+
+			var payload = {
+				field: obj,
+				message: ""
+			};
+
+			$.ajax({
+				url: updateFieldsUrl,
+				method: 'POST',
+				data: JSON.stringify(payload),
+				contentType: "application/json;",
+				headers: {
+					'X-CSRF-TOKEN': token
+				},
+				error: function(response) {
+					var errorMsg = validationErrorMsgs[response.responseText];
+					$.notify(errorMsg, {
+						status : 'danger',
+						pos : 'top-right'
+					});
+					$("#"+field).prop("checked", !obj);
+				},
+				success: function(response) {
+					$.notify(fieldUpdatedMsg, {
+						status : 'success',
+						pos : 'top-right'
+					});
+				}
+			});
+		}
+
+		function changeStatus(status){
+			var objId = $("#id").val();
+			var updateStatusUrl = url + objId + '/update/status' ;
+			var swalTitle, swalText;
+
+			switch(status){
+				case "ACTIVE":
+					swalTitle = swalActivateTitle;
+					swalText = swalActivateText;
+					break;
+				case "CANCELLED":
+					swalTitle = swalCancelTitle;
+					swalText = swalCancelText + "<br/><br/><label>Besked til leverandører:</label><br/>" + "<textarea class=\"form-control\" rows=\"5\" style=\"margin-top: 10px; width:100%;\" id='cancelReasonText'></textarea>";
+					break;
+				default:
+					swalTitle = "Wrong status input";
+					swalText = "Wrong status input";
+					break;
+			}
+
+			if (status == 'ACTIVE' && $('#endTime').data("DateTimePicker").date() == null) {
+				swal(changingStatusErrorTitle, changingStatusErrorText, "warning");
+				return;
+			}
+
+			swal({
+					html: true,
+					title: swalTitle,
+					text : swalText,
+					type : "warning",
+					showCancelButton : true,
+					confirmButtonColor : "#DD6B55",
+					confirmButtonText : confirmTxt,
+					cancelButtonText : cancelTxt,
+					closeOnConfirm : false,
+					closeOnCancel : true
+				},
+				function(isConfirm) {
+					if (isConfirm) {
+						if (status == "CANCELLED") {
+							var val = document.getElementById('cancelReasonText').value;
+							if (val === "") {
+								swal.showInputError(swalCancelReasonFail);
+								return false;
+							}
+						}
+						swal.close();
+						$.ajax({
+							url: updateStatusUrl,
+							method: 'POST',
+							data: JSON.stringify({
+								status: status,
+								message: val
+							}),
+							contentType: "application/json;",
+							headers: {
+								'X-CSRF-TOKEN': token
+							},
+							error: function (response) {
+								var errorMsg = response.responseText;
+
+								$.notify(errorMsg, {
+									status: 'danger',
+									pos: 'top-right'
+								});
+							},
+							success: function (response) {
+								window.location.reload();
+							}
+						});
+					}
+				}
+			);
+		}
+		
+		function editDescription(element) {
+			toggleDescriptionEdit(element, true);
+		}
+		
+		function saveDescription(element) {
+			var updateDescriptionUrl = url + purchaseId + '/update/description';
+			var purchaseRequirementId = $(element).closest("td").data("purchaserequirementid");
+			var requirementId = $(element).closest("td").data("requirementid");
+			var description = $(element).closest("td").find(".editDescription").val();
+			$.ajax({
+				url: updateDescriptionUrl,
+				method: 'POST',
+				data: JSON.stringify({
+					requirementId: requirementId,
+					purchaseRequirementId: purchaseRequirementId,
+					description: description
+				}),
+				contentType: "application/json;",
+				headers: {
+					'X-CSRF-TOKEN': token
+				},
+				error: function (response) {
+					var errorMsg = response.responseText;
+
+					$.notify(errorMsg, {
+						status: 'danger',
+						pos: 'top-right'
+					});
+				},
+				success: function (response) {
+					var span = $(element).closest("td").find(".displayDescription");
+					span.text(description);
+					toggleDescriptionEdit(element, false);
+				}
+			});
+		}
+
+		function cancelDescription(element) {
+			var textarea = $(element).closest("td").find("editDescription");
+			var span = $(element).closest("td").find(".displayDescription");
+			textarea.val(span.text());
+			toggleDescriptionEdit(element, false);
+		}
+
+		function toggleDescriptionEdit(element, edit) {
+			var textarea = $(element).closest("td").find(".editDescription");
+			var span = $(element).closest("td").find(".displayDescription");
+			var saveBtn = $(element).closest("td").find(".save");
+			var cancelBtn = $(element).closest("td").find(".cancel");
+			var editBtn = $(element).closest("td").find(".edit");
+
+			if (edit) {
+				editBtn.hide();
+				saveBtn.show();
+				cancelBtn.show();
+
+				span.hide();
+				textarea.show();
+
+				textarea.css('min-height', span.height() + 120 + 'px');
+			} else {
+				span.show();
+				textarea.hide();
+
+				editBtn.show();
+				saveBtn.hide();
+				cancelBtn.hide();
+			}
+		}
+		
+		function handlePriority() {
+			var checked = $("#requirementPriorityEnabled").prop("checked");
+			if (checked) {
+				$("#priorityToggleBtn").show();
+				currentTable = $('#listTable').DataTable();
+		        var column = currentTable.column(2);
+		        column.visible(true);
+		        
+		        $("#customRequirementImportance").show()
+			} else {
+				$("#priorityToggleBtn").hide();
+				currentTable = $('#listTable').DataTable();
+		        var column = currentTable.column(2);
+		        column.visible(false);
+		        
+		        $("#customRequirementImportance").hide()
+			}
+		}
+		/*]]>*/
+	</script>
+</body>
+</html>

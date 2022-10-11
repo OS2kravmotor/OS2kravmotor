@@ -1,0 +1,8 @@
+CREATE TABLE cms_messages (
+  id                           BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  cms_key                      VARCHAR(255) NOT NULL,
+  cms_value                    TEXT NOT NULL,
+  last_updated                 DATETIME NULL
+);
+
+INSERT INTO cms_messages(id, cms_key, cms_value, last_updated) values (1, 'FRONTPAGE', '<h3>Lokal adgang til OS2Kravmotor</h3><p>Brugere i de respektive kommuner logger på løsningen via AD FS. Det sker via ”Log in” øverst i venstre hjørne. Man kan have rollerne Administrator, Redaktør og Indkøber – disse håndteres også via AD FS. For at få adgang til OS2Kravmotor, skal man kontakte brugeradministrationsfunktionen i kommunens egen IT og Digitaliserings-afdeling.</p><h3>Tilslutning til OS2kravmotor - den tværkommunale løsning for ikke-funktionelle krav</h3><p>OS2kravmotor er en cloud-baseret tværkommunal løsning, der bruges til at oprette, vedligeholde og kvalitetssikre de ikke-funktionelle krav, der anvendes i forbindelse med markedsdialog på nye it-løsninger. OS2kravmotor anvendes også til at understøtte markedsdialogprocessen, og opsamle leverandørernes svar på de krav, der stilles i forbindelse med en markedsdialog.</p><p>OS2kravmotor indgår i OS2 - Offentligt Digitaliseringsfælleskab. OS2 er en frivillig forening der kræver særskilt tilslutning.</p><p>Læs mere tilslutning til OS2kravmotor <a href="https://os2.eu/dokument/os2kravmotor-tilslutning">her</a>.</p><p>Hvis din kommune ønsker at anvende OS2kravmotor har vi udarbejdet en vejledning med 4 simple trin, find den <a href="https://os2.eu/dokument/kom-i-gang-med-os2kravmotor">her</a>.</p><p>I er selvfølgelig også velkommen til at kontakt OS2 på <a href="mailto:os2@os2.eu">os2@os2.eu</a>.</p>', NOW());

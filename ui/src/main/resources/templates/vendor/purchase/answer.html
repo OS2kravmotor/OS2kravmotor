@@ -1,0 +1,227 @@
+<div class="row">
+	<div class="col-lg-12">
+		<form id="answer-form" class="form-horizontal" th:object="${purchaseRequirementAnswer}" th:action="@{''}" method="post">
+			<input type="hidden" th:field="*{id}"/>
+			<input id="infoRequirement" th:type="hidden" th:field="*{requirement.infoRequirement}"/>
+			<div id="answer_description" class="tab-pane fade in active">
+
+				<fieldset>
+					<div class="form-group">
+						<div class="col-sm-offset-2 col-sm-10">
+							<button tabindex="5" th:onclick="'loadPurchaseRequirementAnswer(\'' + ${previous} + '\');return false;'" th:disabled="${previous==null}" class="btn btn-lg btn-default">
+								<em class="fa fa-fw fa-chevron-left"></em> <span th:text="#{html.control.button.previousrequirement}"></span>
+							</button>
+							<button tabindex="6" th:onclick="'loadPurchaseRequirementAnswer(\'' + ${next} + '\');return false;'" th:disabled="${next==null}" class="btn btn-lg btn-default">
+								<span th:text="#{html.control.button.nextrequirement}"></span> <em class="fa fa-fw fa-chevron-right"></em>
+							</button>
+							<button tabindex="7" class="btn btn-lg btn-default" onclick="save();loadPurchaseRequirementAnswerList();return false;" style="margin-left:20px;">
+								<em class="fa fa-fw fa-list"></em> <span th:text="#{html.control.button.list}"></span>
+							</button>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset>
+					<div class="form-group">
+						<label class="col-sm-2 control-label"
+							   th:text="#{html.answer.requirementid}"></label>
+						<div class="col-sm-10">
+							<span th:text="*{requirement.requirementId}" class="form-control preformat" th:readonly="readonly"></span>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset>
+					<div class="form-group">
+						<label class="col-sm-2 control-label"
+							   th:text="#{html.answer.requirement}"></label>
+						<div class="col-sm-10">
+							<div th:text="*{requirement.name}" class="preformat form-control" style="height: auto !important;" th:readonly="readonly"></div>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset>
+					<div class="form-group">
+						<label class="col-sm-2 control-label"
+							   th:text="#{html.answer.description}"></label>
+						<div class="col-sm-10">
+							<div th:text="*{requirement.description}" class="preformat form-control" style="height: auto !important;" th:readonly="readonly"></div>
+						</div>
+					</div>
+				</fieldset>
+				<fieldset th:if="*{requirement.rationale != null}">
+					<div class="form-group">
+						<label class="col-sm-2 control-label"
+							   th:text="#{html.answer.rationale}"></label>
+						<div class="col-sm-10">
+							<div th:text="*{requirement.rationale}" class="preformat form-control" style="height: auto !important;" th:readonly="readonly"></div>
+						</div>
+					</div>
+				</fieldset>
+				<fieldset th:if="${not #lists.isEmpty(attachments)}">
+					<div class="form-group">
+						<label class="col-sm-2 control-label" th:text="#{html.answer.attachments}"></label>
+						<div class="col-sm-10">
+							<ul>
+								<li class="form-control-static" th:each="attachment : ${attachments}">
+									<em class="fa fa-fw fa-paperclip"></em>
+									<a th:text="${attachment.name}" th:href="${attachment.url}"></a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</fieldset>
+				<fieldset th:if="${requirementPriorityEnabled}">
+					<div class="form-group">
+						<label class="col-sm-2 control-label" th:text="#{html.answer.priority}"></label>
+						<div class="col-sm-10">
+							<div th:text="#{__${T(dk.digitalidentity.re.dao.model.enums.Importance).valueOf(purchaseRequirementAnswer.requirement.importance).value}__}" class="preformat form-control" style="height: auto !important;" th:readonly="readonly"></div>
+						</div>
+					</div>
+				</fieldset>
+				<fieldset th:if="${shouldShowCustomerComment}">
+					<div class="form-group">
+						<label class="col-sm-2 control-label"
+							   th:text="#{html.answer.custommerComment}"></label>
+						<div class="col-sm-10">
+							<div th:text="${purchaseRequirementAnswer.customerComment}" class="preformat form-control" style="height: auto !important;" th:readonly="readonly"></div>
+						</div>
+					</div>
+				</fieldset>
+				<fieldset>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" th:text="#{html.answer.answer.choice.question}"/>
+						<div class="col-sm-10">
+							<select tabindex="1" id="choice" name="choice" class="form-control" th:disabled="${purchaseRequirementAnswer.purchaseAnswer.purchase.status != T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE && !vendorShouldElaborate}" autofocus="autofocus">
+								<option value="" th:text="#{html.control.select.default}"></option>
+								<option
+										th:each="choice : ${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).values()}"
+										th:value="${choice}"
+										th:text="#{__${choice.displayName}__}"
+										th:selected="${purchaseRequirementAnswer.choice==choice}"
+								/>
+							</select>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset th:if="${askForPrice}" id="price-control">
+					<div class="form-group">
+						<label class="col-sm-2 control-label" th:text="#{html.answer.price}"></label>
+						<div class="col-sm-10">
+							<input tabindex="2" id="price" th:field="*{price}" type="text" class="form-control" th:readonly="${purchaseRequirementAnswer.purchaseAnswer.purchase.status != T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE}"/>
+						</div>
+					</div>
+				</fieldset>
+
+				<fieldset>
+					<div class="form-group">
+						<label class="col-sm-2 control-label" th:text="#{html.answer.answer.optional}"/>
+						<div class="col-sm-10">
+							<textarea tabindex="3" id="detail" th:field="*{detail}" rows="8" type="text" class="form-control" th:readonly="${purchaseRequirementAnswer.purchaseAnswer.purchase.status != T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE && !vendorShouldElaborate}"></textarea>
+						</div>
+					</div>
+				</fieldset>
+			</div>
+		</form>
+	</div>
+</div>
+<script th:inline="javascript">
+	/*<![CDATA[*/
+
+	function initializeAnswerForm() {
+		checkChoiceValidations($("#choice").val(), false);
+	}
+
+	$("#answer-form").validate({
+		rules:{
+			choice: {
+				required: true
+			}
+		}
+	});
+	
+	$("#choice").change(function(){
+		checkChoiceValidations($(this).val(), true);
+	});
+	
+	$("#price").change(function (){
+		$("#answer-form").submit();
+	});
+	
+	$("#detail").change(function (){
+		$("#answer-form").submit();
+	});
+	
+	function save() {
+		if ($("#choice").val() != '') {
+			$("#answer-form").submit();
+		}
+	}
+
+	function checkChoiceValidations(value, save) {
+		var YES = [[${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).YES}]];
+		var YES_AS_AN_ADDON = [[${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).YES_AS_AN_ADDON}]];
+		var YES_PARTIALLY = [[${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).YES_PARTIALLY}]];
+		var askForPrice = [[${askForPrice}]];
+	
+		if (value == YES_PARTIALLY || ((value == YES || value == YES_AS_AN_ADDON) && $("#infoRequirement").val() == 'true')) {
+			$("#detail").rules('add', {
+				required: true,
+				minlength: 3
+			});
+		} else {
+			$("#detail").rules( "remove" );
+		}
+	
+		if (askForPrice && value == YES_AS_AN_ADDON) {
+			$("#price-control").show();
+			$("#price").prop( "disabled", false );
+			$("#price").rules('add', {
+				required: true
+			});
+		} else {
+			$("#price-control").hide();
+			$("#price").prop( "disabled", true );
+			$("#price").rules( "remove" );
+		}
+		
+		if (save && value != YES_AS_AN_ADDON) {
+			$("#answer-form").submit();
+		}
+	}
+	
+	$("#answer-form").submit(function(event) {
+		if ($(this).valid()) {
+			$.post("/vendor/purchase/answer", $(this).serialize())
+			.done(function(){
+				$.notify({
+					message: [[#{html.answer.savedmsg}]]
+					}, {
+						status : 'success',
+						pos : 'top-right'
+					});
+				})
+			.fail(function(response){
+				notifyFail();
+			});
+		}
+		else {
+			notifyFail();
+		}
+		
+		event.preventDefault();
+	});
+	
+	function notifyFail() {
+		$.notify({
+			message: [[#{html.answer.failmsg}]]
+		}, {
+			status: 'danger',
+			autoHideDelay: 4000
+		});
+	}
+	/*]]>*/
+</script>
+

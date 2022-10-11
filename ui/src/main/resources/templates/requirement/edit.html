@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'requirements.shared')" />
+
+		<section>
+			<div class="content-wrapper">
+				<h3>
+					<div id="btnShowHelp" class="btn btn-default" data-toggle="modal" data-target="#helpTextModal">
+						<em class="fa fa-question" style="margin-right: 10px;"></em>
+						<span th:text="#{html.requirement.edit.helpbtn}"></span>
+					</div>
+
+					<div th:if="not ${requirement.shared}" id="btnMakeRequest" class="btn btn-default" data-toggle="modal" data-target="#makeRequestModal">
+						<i class="fa fa-share" style="margin-right: 10px;"></i>
+						<span th:text="#{html.requirement.edit.makeRequest}"></span>
+					</div>
+
+					<div th:if="not ${requirement.shared}" id="btnCancelRequest" class="btn btn-default">
+						<i class="fa fa-share" style="margin-right: 10px;"></i>
+						<span th:text="#{html.requirement.edit.cancelRequest}"></span>
+					</div>
+					<a class="btn btn-default" th:href="@{/requirement/history/{id}(id=${requirement.id})}"><em class="fa fa-fw fa-list" th:title="#{html.mouseover.history}">&nbsp</em><span th:text="#{html.requirement.page.view.history}"></span></a>
+				</h3>
+
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<form class="form-horizontal" id="requirement-form" th:action="@{/requirement/edit}" method="post" th:object="${requirement}" enctype="multipart/form-data">
+									<input id="realAvailableForAllDomains" type="hidden" th:field="*{availableForAllDomains}" />
+									<input id="realAvailableForAllTags" type="hidden" th:field="*{availableForAllTags}" />
+									<input id="realInfoRequirement" type="hidden" th:field="*{infoRequirement}" />
+									<input id="realFavorite" type="hidden" th:field="*{favorite}" />
+									<input id="realDisable" type="hidden" th:field="*{extDisable}" />
+									<input id="realRelevantForSaas" type="hidden" th:field="*{relevantForSaas}" />
+									<input id="realRelevantForOnPremise" type="hidden" th:field="*{relevantForOnPremise}" />
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.requirement.id}"></label>
+											<div class="col-sm-8 input-group>">
+												<input th:field="*{id}" class="form-control" readonly="readonly"/>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.name}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.name}"></em>
+											</label>
+											<div class="col-sm-8">
+												<input th:field="*{name}" class="form-control"
+													   th:readonly="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}" />
+	
+												<ul th:if="${#fields.hasErrors('name')}" class="error">
+													<li th:each="err : ${#fields.errors('name')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.favorite}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.favorite}"></em>
+											</label>
+											<div class="col-sm-8">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input id="cbFavorite" class="checkboxaction" type="checkbox" th:checked="*{favorite}" />
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+	
+									<th:block th:if="${requirement.cvr == '00000000'}">								
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirementext.disable}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.disable}"></em>
+											</label>
+											<div class="col-sm-8">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input id="cbDisable" class="checkboxaction" type="checkbox" th:checked="*{extDisable}" />
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+
+									<fieldset id="disableReasonBlock">
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.requirementext.disable.reason}"/>
+											<div class="col-sm-8">
+												<textarea rows="8" th:field="*{extDisableReason}" class="form-control"></textarea>
+											</div>
+										</div>
+									</fieldset>
+									</th:block>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.category}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.category}"></em>
+											</label>
+											<div class="col-sm-8">
+												<select th:field="*{category}" class="form-control"
+														th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}">
+													<option class="form-control" th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"/>
+												</select>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset class="subcategories">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.subcategory}"></span>
+											</label>
+											<div class="col-sm-8">
+												<select th:field="*{subcategory}" class="form-control"
+														th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}">
+													<option class="form-control" th:each="category : ${subcategories}" th:value="${category.id}" th:text="${category.name}"/>
+												</select>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.importance}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.importance}"></em>
+											</label>
+											<div class="col-sm-8">
+												<select th:field="*{importance}" class="form-control"
+														th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}">
+													<option th:each="type : ${T(dk.digitalidentity.re.dao.model.enums.Importance).values()}" th:value="${type}" th:text="#{__${type.value}__}" th:selected="${type} == *{importance}" />
+												</select>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.description}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.description}"></em>
+											</label>
+											<div class="col-sm-8">
+												<textarea rows="8" th:field="*{description}" class="form-control"
+														th:readonly="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}"></textarea>
+												<ul th:if="${#fields.hasErrors('description')}" class="error">
+													<li th:each="err : ${#fields.errors('description')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset th:if="${requirement.cvr == '00000000'}">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirementext.description}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.local_description}"></em>
+											</label>
+											<div class="col-sm-8">
+												<textarea rows="8" th:field="*{extDescription}" class="form-control"></textarea>
+												<ul th:if="${#fields.hasErrors('extDescription')}" class="error">
+													<li th:each="err : ${#fields.errors('extDescription')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.rationale}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.rationale}"></em>
+											</label>
+											<div class="col-sm-8">
+												<textarea rows="8" th:field="*{rationale}" class="form-control"
+														th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}"></textarea>
+												<ul th:if="${#fields.hasErrors('rationale')}" class="error">
+													<li th:each="err : ${#fields.errors('rationale')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.helptext}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.helptext}"></em>
+											</label>
+											<div class="col-sm-8">
+												<textarea rows="8" th:field="*{helpText}" class="form-control"></textarea>
+												<ul th:if="${#fields.hasErrors('helpText')}" class="error">
+													<li th:each="err : ${#fields.errors('helpText')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.notes}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.notes}"></em>
+											</label>
+											<div class="col-sm-8">
+												<textarea rows="8" th:field="*{notes}" class="form-control" 
+												th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}"></textarea>
+												<ul th:if="${#fields.hasErrors('notes')}" class="error">
+													<li th:each="err : ${#fields.errors('notes')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.requirement.interestedparty}"></label>
+											<div class="col-sm-8">
+												<input th:field="*{interestedParty}" class="form-control"
+													   th:readonly="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}" />
+	
+												<ul th:if="${#fields.hasErrors('interestedParty')}" class="error">
+													<li th:each="err : ${#fields.errors('interestedParty')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset th:if="${requirement.cvr != '00000000' or #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')')}">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:utext="#{html.requirement.attachments}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.attachments}"></em>
+											</label>
+											<div class="col-sm-10 clearfix">
+												<select th:field="*{removeAttachments}" multiple="multiple" style="display:none"></select>
+	
+												<ul id="attachments">
+													<li class="row" th:each="attachment,i : *{attachments}">
+														<div class="col-sm-4 form-control-static">
+															<em class="fa fa-fw fa-paperclip"></em>
+															<a th:text="${attachment.name}" th:href="${attachment.url}"></a>
+														</div>
+	
+														<div class="col-sm-8 form-control-static">
+															<button type="button" th:id="'att'+${attachment.id}" th:onclick="'removeAttachment(' +${attachment.id}+ ')'" class="btn btn btn-primary">
+																<em class="fa fa-fw fa-remove"></em>
+																<span th:text="#{html.requirement.removefile}"/>
+															</button>
+														</div>
+													</li>
+												</ul>
+											</div>
+	
+											<div class="col-sm-offset-2 col-sm-10">
+												<div class="form-control-static">
+													<button type="button" onclick="addAttachment(this)" class="btn btn-primary">
+														<em class="fa fa-fw fa-plus"></em>
+														<span th:text="#{html.requirement.addfile}"/>
+													</button>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+	
+									<!-- non-global admins should be able to view attachments on global requirements -->								
+									<fieldset th:if="${requirement.cvr == '00000000' and #authorization.expression('not hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')')}">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:utext="#{html.requirement.attachments}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.attachments}"></em>
+											</label>
+											<div class="col-sm-10 clearfix">
+												<ul id="attachments">
+													<li class="row" th:each="attachment,i : *{attachments}">
+														<div class="col-sm-4 form-control-static">
+															<em class="fa fa-fw fa-paperclip"></em>
+															<a th:text="${attachment.name}" th:href="${attachment.url}"></a>
+														</div>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<!-- option for adding local requirements is only visible on global requirements -->
+	                                <fieldset th:if="${requirement.cvr == '00000000'}">
+	                                    <div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:utext="#{html.requirement.localattachments}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.localattachments}"></em>
+											</label>
+										    <div class="col-sm-10 clearfix">
+	                                            <select th:field="*{removeLocalAttachments}" multiple="multiple" style="display:none"></select>
+	                                            <ul id="localAttachments">
+	                                                <li class="row" th:each="attachment,i : *{localAttachments}">
+	                                                    <div class="col-sm-2 form-control-static">
+	                                                        <em class="fa fa-fw fa-paperclip"></em>
+	                                                        <a th:text="${attachment.name}" th:href="${attachment.url}"></a>
+	                                                    </div>
+	
+	                                                    <div class="col-sm-10 form-control-static">
+	                                                        <button type="button" th:id="'att'+${attachment.id}" th:onclick="'removeLocalAttachment(' +${attachment.id}+ ')'" class="btn btn btn-primary">
+	                                                            <em class="fa fa-fw fa-remove"></em>
+	                                                            <span th:text="#{html.requirement.removefile}"/>
+	                                                        </button>
+	                                                    </div>
+	                                                </li>
+	                                            </ul>
+										    </div>
+	
+	                                        <div class="col-sm-offset-2 col-sm-10">
+	                                            <div class="form-control-static">
+	                                                <button type="button" onclick="addLocalAttachment(this)" class="btn btn-primary">
+	                                                    <em class="fa fa-fw fa-plus"></em>
+	                                                    <span th:text="#{html.requirement.addfile}"/>
+	                                                </button>
+	                                            </div>
+	                                        </div>
+	                                    </div>
+	                                </fieldset>
+	
+									<fieldset id="domainsFieldSet">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.domains}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.domains}"></em>
+											</label>
+											
+											<div class="col-sm-10 clearfix" style="margin-bottom: 10px;">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input id="cbAlldomains" class="checkboxaction" type="checkbox" th:checked="*{availableForAllDomains}"
+														       th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}" />
+														<span class="fa fa-check"></span>
+													</label>
+													
+													<label th:text="#{html.requirement.availableforalldomains}"></label>
+												</div>
+											</div>
+											
+											<div class="col-sm-offset-2 col-sm-8">
+												<select th:field="*{domains}" multiple="multiple" style="display:none"></select>
+	
+												<select multiple="multiple" id="fakedomains">
+													<option th:each="domain : ${alldomains}" th:value="${domain.id}"
+													        th:text="${domain.name}" th:selected="${#lists.contains(requirement.domainsRichObjects, domain)}"
+													        th:classappend="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false} ? 'disabled' : ''">
+													</option>
+												</select>
+	
+												<ul th:if="${#fields.hasErrors('domains')}" class="error">
+													<li th:each="err : ${#fields.errors('domains')}" th:text="${err}"/>
+												</ul>
+											</div>										
+										</div>
+									</fieldset>
+	
+									<fieldset id="tagsFieldSet">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.tags}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.tags}"></em>
+											</label>
+	
+											<div class="col-sm-10 clearfix" style="margin-bottom: 10px;">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input id="cbAllTags" class="checkboxaction" type="checkbox" th:checked="*{availableForAllTags}"
+														       th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}" />
+														<span class="fa fa-check"></span>
+													</label>
+													<label th:text="#{html.requirement.availableforalltags}"></label>
+												</div>
+											</div>
+	
+											<div class="col-sm-offset-2 col-sm-8">
+												<select th:field="*{tags}" multiple="multiple" style="display:none"></select>
+	
+												<select multiple="multiple" id="faketags">
+													<option th:each="tag : ${alltags}" th:value="${tag.id}" th:text="${tag.name}"
+													        th:selected="${#lists.contains(requirement.tagsRichObjects, tag)}"
+													        th:classappend="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false} ? 'disabled' : ''">
+													</option>
+												</select>
+	
+												<ul th:if="${#fields.hasErrors('tags')}" class="error">
+													<li th:each="err : ${#fields.errors('tags')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset id="principlesFieldSet">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.principles}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.principles}"></em>
+											</label>
+											<div class="col-sm-8">
+												<select th:field="*{principles}" multiple="multiple" style="display:none"></select>
+	
+												<select multiple="multiple" id="fakeprinciples" class="form-control">
+													<option th:each="principle : ${allprinciples}" th:value="${principle.id}" th:text="${principle.name}"
+													        th:selected="${#lists.contains(requirement.principlesRichObjects, principle)}"
+													        th:classappend="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false} ? 'disabled' : ''">
+													</option>
+												</select>
+												<ul th:if="${#fields.hasErrors('principles')}" class="error">
+													<li th:each="err : ${#fields.errors('principles')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.isInfoRequirement}"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.isInfoRequirement}"></em>
+											</label>
+											<div class="col-sm-8">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input id="cbInfoRequirement" class="checkboxaction" type="checkbox" th:checked="*{infoRequirement}"
+															   th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}" />
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.requirement.changed}"></label>
+											<div class="col-sm-8">
+												<input th:value="${#dates.format(requirement.lastChanged, 'yyyy/MM/dd - HH:mm')}" class="form-control" readonly="readonly"/>
+												<ul th:if="${#fields.hasErrors('name')}" class="error">
+													<li th:each="err : ${#fields.errors('name')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.relevantForSaas}"></span>
+ 												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.relevantForSaas}"></em>
+											</label>
+
+											<div class="col-sm-8">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input id="cbRelevantForSaas" class="checkboxaction" type="checkbox" th:checked="*{relevantForSaas}" th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}"/>
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.requirement.relevantForOnPremise}"></span>
+ 												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.requirement.relevantForOnPremise}"></em>
+											</label>
+
+											<div class="col-sm-8">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input id="cbRelevantForOnPremise" class="checkboxaction" type="checkbox" th:checked="*{relevantForOnPremise}" th:disabled="${requirement.cvr == '00000000' and #authorization.expression('hasRole(''ROLE_http://kravmotoren.dk/globaleditor'')') == false}"/>
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<div class="col-sm-offset-2 col-sm-8">
+												<button type="submit" style="margin-right: 5px;" class="btn btn-lg btn-primary col-xs-2" th:text="#{html.control.button.save}"></button>
+												<a th:if="${requirement.shared}" th:href="@{/requirement/listshared}" style="margin-right: 5px;" class="btn btn-lg btn-danger col-xs-2" th:text="#{html.control.button.cancel}"></a>
+												<a th:unless="${requirement.shared}" th:href="@{/requirement/list}" style="margin-right: 5px;" class="btn btn-lg btn-danger col-xs-2" th:text="#{html.control.button.cancel}"></a>
+											</div>
+										</div>
+									</fieldset>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<!-- Make Request Modal -->
+	<div class="modal fade" id="makeRequestModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<form class="form-horizontal" method="post" th:action="@{/requirement/makeRequest/{requirementId}(requirementId=${requirement.id})}" th:object="${requirement}">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h4 class="modal-title" th:text="#{html.requirement.page.list.promoterequest.title}" />
+					</div>
+					<div class="modal-body">
+						<label th:text="#{html.requirement.edit.promote.label}"></label>
+						<div id="targetList">
+							<label class="radio c-radio" style="margin-left: 25px;">
+								<input value="global" type="radio" name="target" checked="checked"/>
+								<span class="fa fa-check"></span>
+								<th:block th:text="#{html.requirement.edit.promote.global}" />
+							</label>
+						</div>
+						<div class="requestReason">
+							<hr/>
+							<label th:text="#{html.requirement.page.list.promoterequest.reason.label}"></label>
+							<textarea name="reason" id="reason" class="form-control" rows="5"></textarea>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<input type="submit" class="btn btn-primary" th:value="#{html.control.button.promote}" />
+						<button type="button" class="btn btn-danger" data-dismiss="modal" th:text="#{html.control.button.cancel}"></button>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+	<div class="modal fade" id="helpTextModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title" th:text="#{html.requirement.edit.helpbtn}" />
+				</div>
+				<div class="modal-body">
+					<div th:replace="fragment/helpText :: helpText"/>
+				</div>
+				<div class="modal-footer"></div>
+			</div>
+		</div>
+	</div>
+
+<div th:replace="fragment/footer :: footer"/>
+
+<style>
+	em.fa-question {
+		margin-right: -18px;
+	}
+	
+	.requestReason > textarea#reason {
+		max-width:100%;
+		min-width: 100%;
+	}
+</style>
+
+<script th:inline="javascript">
+/*<![CDATA[*/           		
+	/*[+
+		var urL = [[@{/requirement/}]];
+		var requirementId = [[${requirement.id}]];
+		var requirementIsShared = [[${requirement.shared}]];
+		var fieldNotUpdatedMsg = [[#{html.requirement.failedupdate}]];
+		var promoteRequested = [[#{html.requirement.promote.requested}]];
+		var promoteCancelled = [[#{html.requirement.promote.cancelled}]];
+		var showCancelBtn = [[${requirement.requestedToBeShared}]];
+		var errorMsg = [[#{html.category.list.msg.error}]];
+		var selected = [[${requirement.subcategory}]]
+	+]*/
+
+	var token = $("meta[name='_csrf']").attr("content");
+	$(document).ready(function () {
+
+        var selectedLabel = /*[[#{html.multiselect.footer.selected}]]*/ "defaultvalue";
+        var unselectedLabel = /*[[#{html.multiselect.footer.notselected}]]*/ "defaultvalue";
+
+        var seletedFooter   = '<div class="footer">' + selectedLabel + '</div>';
+        var unseletedFooter = '<div class="footer">' + unselectedLabel + '</div>';
+
+		$('#fakedomains').multiSelect({'selectableFooter': unseletedFooter, 'selectionFooter': seletedFooter});
+		$('#faketags').multiSelect({'selectableFooter': unseletedFooter, 'selectionFooter': seletedFooter});
+		$('#fakeprinciples').multiSelect({'selectableFooter': unseletedFooter, 'selectionFooter': seletedFooter});
+		
+		loadSubcategories($("#category").val());
+		$("#category").change(function() {
+			loadSubcategories($("#category").val());
+		});
+
+		$('[data-toggle="popover"]').popover();
+		
+		function handleOnChangeEventForDomains() {
+			if ($('#cbAlldomains').is(':checked')) {
+ 				$('#realAvailableForAllDomains').val(1);
+ 				$('#domainsFieldSet :not("#cbAlldomains")').attr("disabled", "disabled");
+ 				$('#fakedomains').attr("disabled", "disabled");
+ 				$("#fakedomains").multiSelect('refresh');
+			} else {
+ 				$('#realAvailableForAllDomains').val(0);
+ 				$('#domainsFieldSet :not("#cbAlldomains")').removeAttr("disabled");
+ 				$('#fakedomains').removeAttr("disabled");
+ 				$("#fakedomains").multiSelect('refresh');
+ 			}
+		};
+
+		function handleOnChangeEventForTags() {
+			if ($('#cbAllTags').is(':checked')) {
+				$('#realAvailableForAllTags').val(1);
+				$('#tagsFieldSet :not("#cbAllTags")').attr("disabled", "disabled");
+				$('#faketags').attr("disabled", "disabled");
+				$("#faketags").multiSelect('refresh');
+			} else {
+				$('#realAvailableForAllTags').val(0);
+				$('#tagsFieldSet :not("#cbAllTags")').removeAttr("disabled");
+				$('#faketags').removeAttr("disabled");
+				$("#faketags").multiSelect('refresh');
+			}
+		};
+
+		function handleOnChangeEventForInfoRequirement() {
+			if ($('#cbInfoRequirement').is(':checked')) {
+				$('#realInfoRequirement').val(1);
+			} else {
+				$('#realInfoRequirement').val(0);
+			}
+		};
+
+		function handleOnChangeEventForFavorite() {
+			if ($('#cbFavorite').is(':checked')) {
+				$('#realFavorite').val(1);
+			} else {
+				$('#realFavorite').val(0);
+			}
+		}
+
+		function handleOnChangeEventForDisable() {
+			if ($('#cbDisable').is(':checked')) {
+				$('#realDisable').val(1);
+				
+				$('#disableReasonBlock').show();
+			} else {
+				$('#realDisable').val(0);
+				
+				$('#disableReasonBlock').hide();
+			}
+		}
+
+		function handleOnChangeEventForRelevantForSaas() {
+			if ($('#cbRelevantForSaas').is(':checked')) {
+				$('#realRelevantForSaas').val(1);
+			} else {
+				$('#realRelevantForSaas').val(0);
+			}
+		};
+
+		function handleOnChangeEventForRelevantForOnPremise() {
+			if ($('#cbRelevantForOnPremise').is(':checked')) {
+				$('#realRelevantForOnPremise').val(1);
+			} else {
+				$('#realRelevantForOnPremise').val(0);
+			}
+		};
+
+		$('#cbAlldomains').change(handleOnChangeEventForDomains);
+		$('#cbAllTags').change(handleOnChangeEventForTags);
+		$('#cbInfoRequirement').change(handleOnChangeEventForInfoRequirement);
+		$('#cbFavorite').change(handleOnChangeEventForFavorite);
+		$('#cbDisable').change(handleOnChangeEventForDisable);
+		$('#cbRelevantForSaas').change(handleOnChangeEventForRelevantForSaas);
+		$('#cbRelevantForOnPremise').change(handleOnChangeEventForRelevantForOnPremise);
+
+		//in case of page refresh
+		handleOnChangeEventForDomains();
+		handleOnChangeEventForTags();
+		handleOnChangeEventForInfoRequirement();
+		handleOnChangeEventForFavorite();
+		handleOnChangeEventForDisable();
+		handleOnChangeEventForRelevantForSaas();
+		handleOnChangeEventForRelevantForOnPremise();
+
+		if (!requirementIsShared) {
+			if (showCancelBtn) {
+				$("#btnMakeRequest").hide();
+			}
+			else {
+				$("#btnCancelRequest").hide();
+			}
+
+			$("#btnCancelRequest").click(function(){
+				$.ajax({
+					method: "POST",
+					url: urL + "cancelRequest/" + requirementId,
+					headers: {
+						'X-CSRF-TOKEN': token
+					},
+					success: function(response) {
+						$.notify(promoteCancelled, {
+	                        status : 'warning',
+							pos : 'top-right'
+						});
+
+						$("#btnMakeRequest").show();
+						$("#btnCancelRequest").hide();
+					},
+					error: function(response) {
+						$.notify(fieldNotUpdatedMsg, {
+	                        status : 'danger',
+							pos : 'top-right'
+						});
+					}
+				});
+			});
+		}
+
+		$('#requirement-form').on("submit",function(e) {
+		e.preventDefault(); // cancel the actual submit
+			// submit bypassing the jQuery bound event
+			var $options = $("select#fakedomains option").filter(":selected").clone();
+			$('#domains').empty();
+			$('#domains').append($options);
+			$('#domains option').attr('selected','selected');
+
+			$options = $("select#faketags option").filter(":selected").clone();
+			$('#tags').empty();
+			$('#tags').append($options);
+			$('#tags option').attr('selected','selected');
+
+			$options = $("select#fakeprinciples option").filter(":selected").clone();
+			$('#principles').empty();
+			$('#principles').append($options);
+			$('#principles option').attr('selected','selected');
+
+			var form = this;
+			form.submit();
+		});
+
+		//Load communities to the modal
+		$.ajax("/getCommunities", {
+			type : 'GET',
+			dataType : 'json',
+			cache : false,
+			success : function(data) {
+				for(var i=0;i<data.length;i++){
+					var entry = data[i];
+					var rowEntry = '<label class="radio c-radio" style="margin-left: 25px;">'+
+										'<input value="'+entry.id+'" type="radio" name="target"/><span class="fa fa-check"></span>'+entry.name+
+									'</label>';
+					$("#targetList").append(rowEntry);
+				}
+			},
+			error : function(xhr, status) {
+				console.log(status);
+				console.log(xhr.responseText);
+			}
+		});
+
+		$(document.body).on("change", 'input[name="target"]', function () {
+			var input = $(this);
+			if (input.val() == "global") {
+				$('.requestReason').show();
+			} else {
+				$('.requestReason').hide();
+			}
+		});
+
+	});
+	
+	function removeAttachment(attachmentId){
+		var btn = $('#att'+attachmentId);
+		btn.closest('li').remove();
+		$('#removeAttachments').append('<option value="'+attachmentId+'" selected="selected"></option>');
+	}
+	
+	function addAttachment(element){
+		var btn = $(element);
+		$("#attachments").append('<li><input type="file" style="padding-bottom: 8px;" name="files" /></li>');
+	}
+
+	function removeLocalAttachment(attachmentId){
+		var btn = $('#att'+attachmentId);
+		btn.closest('li').remove();
+		$('#removeLocalAttachments').append('<option value="'+attachmentId+'" selected="selected"></option>');
+	}
+
+	function addLocalAttachment(element){
+		var btn = $(element);
+		$("#localAttachments").append('<li><input type="file" style="padding-bottom: 8px;" name="localFiles" /></li>');
+	}
+	
+	function loadSubcategories(id) {
+		$.ajax({
+			type: "GET",
+			url: "/requirement/categories/" + id + "/getsubcategories",
+			headers: {
+				'X-CSRF-TOKEN': token
+			},
+			success: function(response) {
+				$('#subcategory').empty();
+				$('#subcategory').append('<option selected="selected" value="-1">Intet valgt</option>');
+				console.log(selected)
+				for (let i = 0; i < response.length; i++) {
+					if (response[i].id == selected) {
+						$('#subcategory').append('<option selected="selected" value="' + response[i].id + '">' + response[i].name + '</option>');
+					} else {
+						$('#subcategory').append('<option value="' + response[i].id + '">' + response[i].name + '</option>');
+					}
+				}
+				
+				if (response.length == 0) {
+					$(".subcategories").hide();
+				} else {
+					$(".subcategories").show();
+				}
+				
+			},
+			error: function(jqXHR, textStatus, error) {
+				$.notify(errorMsg, {
+					status : 'warning',
+					pos : 'top-right'
+				});
+			}
+		});
+	}
+/*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'none')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-sm-12">
+								<h3 th:text="#{html.error.method.maxfilesizeerror}"/>
+							</div>
+						</div>
+	
+						<div class="row">
+							<div class="col-sm-12">
+								<span th:text="#{html.error.method.maxfilesizeerror}"/>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	
+	<nav th:replace="fragment/footer :: footer" />
+</body>
+</html>

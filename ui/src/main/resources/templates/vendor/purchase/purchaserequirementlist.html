@@ -1,0 +1,92 @@
+<fieldset>
+    <table class="listTable table table-striped table-hover searchable-table">
+        <thead>
+        <tr>
+            <th class="col-md-1" th:text="#{html.vendor.header.requirementId}"/>
+            <th th:classappend="${askForPrice} ? col-md-3 : col-md-4" th:text="#{html.vendor.header.requirement}"/>
+            <th class="col-md-1" th:text="#{html.vendor.header.answer}"/>
+            <th th:if="${askForPrice}" class="col-md-1" th:text="#{html.vendor.header.price}"/>
+            <th class="col-md-3" th:text="#{html.vendor.header.details}"/>
+            <th class="col-md-2" th:text="#{html.vendor.header.customer}"/>
+            <th class="col-md-1" th:text="#{html.header.operation}"/>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="purchaseRequirementAnswer: ${purchaseAnswer.purchaseRequirementAnswers}">
+            <td>
+                <span th:text="${purchaseRequirementAnswer.requirement.requirementId}"/>
+            </td>
+            <td>
+                <span th:text="${purchaseRequirementAnswer.requirement.name}"/>
+            </td>
+            <td>
+                <em th:if="${purchaseRequirementAnswer.dirtyCopy}" class="fa fa-exclamation-triangle" style="color:orange;" data-toggle="tooltip" th:title="#{html.vendor.copyanswers.dirtyinfo}"></em>
+                <em th:if="${!purchaseRequirementAnswer.answered}" class="fa fa-exclamation-circle" style="color:red;" data-toggle="tooltip" th:title="#{html.vendor.answer.notanswered}"></em>
+                <span th:if="${purchaseRequirementAnswer.choice != null}" th:text="#{__${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).valueOf(purchaseRequirementAnswer.choice).displayName}__}"></span>
+            </td>
+            <td th:if="${askForPrice}" th:text="${purchaseRequirementAnswer.price} ?: ''"/>
+            <td th:text="${purchaseRequirementAnswer.detail} ?: ''" class="preformat"/>
+            <td>
+            	<span th:if="${purchaseRequirementAnswer.customerAnswer == null || purchaseRequirementAnswer.customerAnswer == T(dk.digitalidentity.re.dao.model.enums.CustomerAnswer).NONE}"></span>
+            	<th:block th:unless="${purchaseRequirementAnswer.customerAnswer == null || purchaseRequirementAnswer.customerAnswer == T(dk.digitalidentity.re.dao.model.enums.CustomerAnswer).NONE}">
+            		<span th:if="${purchaseRequirementAnswer.customerAnswer != T(dk.digitalidentity.re.dao.model.enums.CustomerAnswer).ACCEPTED_WITH_COMMENT}" th:text="#{__${T(dk.digitalidentity.re.dao.model.enums.CustomerAnswer).valueOf(purchaseRequirementAnswer.customerAnswer).value}__}" />
+					<span th:if="${purchaseRequirementAnswer.customerAnswer == T(dk.digitalidentity.re.dao.model.enums.CustomerAnswer).ACCEPTED_WITH_COMMENT}" th:text="#{__${T(dk.digitalidentity.re.dao.model.enums.CustomerAnswer).ACCEPTED.value}__}" />
+            	</th:block>
+            </td>
+            <td>
+			 	<a href="" th:onclick="'loadPurchaseRequirementAnswer(\'' + ${purchaseRequirementAnswer.id} + '\'); return false;'" th:unless="${purchaseAnswer.doneAnswering}">
+
+                    <em th:unless="${purchaseRequirementAnswer.purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).COMPLETED &&
+                                     purchaseRequirementAnswer.purchaseAnswer.vendorMustElaborate}"
+                        class="fa fa-fw"
+                        th:classappend="${purchaseRequirementAnswer.purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE} ? fa-pencil : fa-search"
+                        th:title="${purchaseRequirementAnswer.purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).ACTIVE} ? #{html.mouseover.answer} : #{html.mouseover.view}">
+                    </em>
+
+                    <em th:if="${purchaseRequirementAnswer.purchaseAnswer.purchase.status == T(dk.digitalidentity.re.dao.model.enums.Status).COMPLETED &&
+                                 purchaseRequirementAnswer.purchaseAnswer.vendorMustElaborate}"
+                        class="fa fa-fw fa-pencil" th:title="#{html.mouseover.view}">
+                    </em>
+                </a>
+			</td>
+        </tr>
+        </tbody>
+    </table>
+</fieldset>
+
+<style>
+.popover-content {
+  white-space: pre;
+}
+</style>
+
+<script th:inline="javascript">
+		/*<![CDATA[*/
+
+			$(document).ready(function() {
+
+				$('[rel=popover]').popover();
+
+				/*[+
+						var searchTxt = [[#{html.datatables.search}]];
+						var infoDefaultTxt = [[#{html.datatables.info.default.requirements}]];
+						var infoEmptyTxt = [[#{html.datatables.info.empty}]];
+						var infoFilteredTxt = [[#{html.datatables.info.filtered.requirements}]];
+				+]*/
+				$('.listTable').DataTable({
+					'paging':   false,
+					'ordering': false,
+					'info':     true,
+					'stateSave': true,
+					"language": {
+						"search":       searchTxt,
+						"info":         infoDefaultTxt,
+						"zeroRecords":  infoEmptyTxt,
+						"infoEmpty":    "",
+						"infoFiltered": infoFilteredTxt,
+					}
+				});
+			});
+		/*]]>*/
+</script>

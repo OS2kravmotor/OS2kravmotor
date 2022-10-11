@@ -1,0 +1,1 @@
+ALTER TABLE purchase_answer ADD COLUMN vendor_must_elaborate BOOLEAN DEFAULT false;

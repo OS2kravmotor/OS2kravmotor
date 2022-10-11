@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'requirements.community')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="table-responsive">
+									<table class="listTable table table-striped table-hover">
+										<thead>
+											<tr>
+												<th class="col-md-3" th:text="#{html.requirement.name}"/>
+												<th class="col-md-1" th:text="#{html.requirement.category}"/>
+												<th class="col-md-6" th:text="#{html.requirement.description}"/>
+												<th class="col-md-1" th:text="#{html.requirement.communityname}"/>
+												<th class="col-md-1" th:text="#{html.header.operation}"/>
+											</tr>
+										</thead>
+			
+										<tbody>
+											<tr th:each="requirement : ${requirements}">
+												<td>
+													<span th:text="${requirement.name}" />
+													<span style="display:none;" th:text="${requirement.id}" />
+												</td>
+												<td th:text="${requirement.categoryRichObject?.name}"/>
+												<td class="preformat" th:text="${requirement.description}"/>
+												<td th:text="${requirement.cvr}"/>
+												<td>
+													<a th:href="@{/requirement/view/{id}(id=${requirement.id})}"><em class="fa fa-fw fa-search" th:title="#{html.mouseover.view}"></em></a>
+													<a th:href="@{/requirement/edit/{id}(id=${requirement.id})}"><em class="fa fa-fw fa-pencil" th:title="#{html.mouseover.edit}"></em></a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	
+	<nav th:replace="fragment/footer :: footer" />
+
+	<script th:replace="fragment/datatables :: datatables "/>
+
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+		/*[+
+			+]*/
+	/*]]>*/
+	</script>
+</body>
+</html>

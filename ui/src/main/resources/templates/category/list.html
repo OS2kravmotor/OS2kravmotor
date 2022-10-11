@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html  xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'categories')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<h3 sec:authorize="hasRole('ROLE_http://kravmotoren.dk/globaleditor')">
+					<a class="btn btn-default" id="addCategoryButton" href="#" data-toggle="modal" data-target="#addCategoryModal">
+						<i class="fa fa-plus" style="margin-right: 10px;"></i>
+						<span th:text="#{html.category.list.add.label}" />
+					</a>
+				</h3>
+
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="table-responsive">
+									<table class="listTable table table-striped table-hover">
+										<thead>
+											<tr>
+												<th class="col-md-6" th:text="#{html.category.list.name}"/>
+												<th class="col-md-5" th:text="#{html.category.list.subcatagories}"/>
+												<th class="col-md-1" th:text="#{html.header.operation}" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/globaleditor')" />
+											</tr>
+										</thead>
+	
+										<tbody>
+											<tr th:each="category : ${categories}">
+												<td th:text="${category.name}"/>
+												<td th:text="${#lists.size(category.subcategories)}"/>
+												<td sec:authorize="hasRole('ROLE_http://kravmotoren.dk/globaleditor')">
+	                                                <a onclick="editCategory(this);" href="#" th:attr="id=${category.id}, data-name=${category.name}, data-id=${category.id}" data-target="#editCategoryModal"><em class="fa fa-fw fa-pencil" th:title="#{html.mouseover.edit}"></em></a>
+													<a onclick="deleteCategory(this);" href="#" th:attr="data-id=${category.id}"><em class="fa fa-fw fa-remove" th:title="#{html.mouseover.delete}"></em></a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<!-- Modal -->
+	<div id="addCategoryModal" class="modal fade" role="dialog">
+		<form class="form-horizontal" method="post" th:action="@{/category/}" th:object="${category}">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal">&times;</button>
+						<h4 class="modal-title" th:text="#{html.category.list.add.label}"/>
+					</div>
+	
+					<div class="modal-body">
+						<div class="form-group">
+							<label th:text="#{html.category.list.category.label}" class="col-sm-2 control-label"/>
+							<div class="col-sm-10">
+								<input th:field="*{name}" class="form-control" />
+								<ul th:if="${#fields.hasErrors('name')}" class="error">
+									<li class="error" th:each="err : ${#fields.errors('name')}" th:text="${err}"/>
+								</ul>
+							</div>
+						</div>
+					</div>
+	
+					<div class="modal-footer">
+						<div class="col-sm-12">
+							<button type="submit" class="btn btn-primary" th:text="#{html.control.button.save}" />
+							<button type="button" class="btn btn-danger" data-dismiss="modal" th:text="#{html.control.button.close}" />
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+
+    <div id="editCategoryModal" class="modal fade" role="dialog">
+        <form class="form-horizontal" method="post" th:action="@{/category/edit/}" th:object="${categoryEdit}">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title" th:text="#{html.category.list.edit.label}"/>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label th:text="#{html.category.list.category.label}" class="col-sm-2 control-label"/>
+                            <div class="col-sm-10">
+                                <input th:field="*{name}" class="form-control" />
+                                <ul th:if="${#fields.hasErrors('name')}" class="error">
+                                    <li class="error" th:each="err : ${#fields.errors('name')}" th:text="${err}"/>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-10">
+                                <input th:type="hidden" th:field="*{id}" class="form-control"/>
+                            </div>
+                        </div>
+                        
+                        <div id="subcategoriesPlaceholder"></div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <div class="col-sm-12">
+                            <button type="submit" class="btn btn-primary" th:text="#{html.control.button.save}" />
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" th:text="#{html.control.button.close}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <div id="addSubcategoryModal" class="modal fade" role="dialog">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <button type="button" class="close" onclick="subcategoriesService.closeAdd()">&times;</button>
+	                <h4 class="modal-title" th:text="#{html.category.list.add.subcategory}"/>
+	            </div>
+	
+	            <div class="modal-body">
+	                <div class="form-group">
+						<label th:text="#{html.category.list.category.label}" class="col-sm-2 control-label"/>
+						<div class="col-sm-10">
+							<input id="addSubcategoryName" th:value="${subcategoryEdit.name}" class="form-control" />
+						</div>
+					</div>
+					<br><br>
+	            </div>
+	
+	            <div class="modal-footer">
+	                <div class="col-sm-12">
+	                    <button type="submit" class="btn btn-primary" onclick="subcategoriesService.saveSubcategory()" th:text="#{html.control.button.save}" />
+	                    <button type="button" class="btn btn-danger" onclick="subcategoriesService.closeAdd()" th:text="#{html.control.button.close}" />
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<!-- End Modal -->
+	
+	<div th:replace="fragment/footer :: footer" />
+	
+	<script th:replace="fragment/datatables :: datatables " />
+	<script th:replace="category/fragments/subcategories :: subcategoriesScript"></script>
+	
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+		var token = $("meta[name='_csrf']").attr("content");
+	
+		/*[+
+			var savedMsg = [[#{html.category.list.msg.saved}]];
+			var deletedMsg = [[#{html.category.list.msg.deleted}]];
+			var errorMsg = [[#{html.category.list.msg.error}]];
+		+]*/
+	
+		// This method replaces occurence of {0} with text from parameter
+		String.prototype.format = function () {
+			var args = [].slice.call(arguments);
+			return this.replace(/(\{\d+\})/g, function (a) {
+				return args[+(a.substr(1,a.length-2))||0];
+			});
+		};
+
+		function editCategory(obj) {
+			var id = $(obj).attr('data-id');
+            var name = $(obj).attr('data-name');
+            
+            $('#editCategoryModal').modal("show");
+            $('#editCategoryModal').find('.error').remove();
+            $('#editCategoryModal').find("#id").val(id).focus();
+            $('#editCategoryModal').find("#name").val(name).focus();
+            loadSubcategories(id);
+            
+		}
+		
+		function loadSubcategories(id) {
+			$("#subcategoriesPlaceholder").load("/category/" + id + "/fragments/subcategories", function(){
+            	subcategoriesService.init();
+	  		});
+		}
+		
+		function deleteCategory(obj) {
+			var id = $(obj).data('id');
+
+			/*[+
+			var tryDeleteURI = [[@{/category/trydelete/}]] + id;
+			var deleteURI = [[@{/category/}]] + id
+			var url = [[@{/category/}]];
+			var urlWithId = [[@{/category/}]] + id;
+			var urlTryDelete =  [[@{/category/trydelete/}]] + id;
+			var titleTxt = [[#{html.category.list.delete.confirm.title}]];
+			var bodyTxt = [[#{html.category.list.delete.confirm.body}]];
+			var bodyTxtFail = [[#{html.category.list.delete.confirm.bodyfail}]];
+			var bodyTxtAdditionalRequirement = [[#{html.category.list.delete.confirm.body.additional.requirement}]];
+			var bodyTxtAdditionalPurchase = [[#{html.category.list.delete.confirm.body.additional.purchase}]];
+			var cancelTxt = [[#{html.control.button.no}]];
+			var confirmTxt = [[#{html.control.button.confirm}]];
+			var deleteTxt = [[#{html.control.button.yes}]];
+			var errorMsg = [[#{html.category.list.errormsg}]];
+			+]*/
+
+			$.ajax({
+				url: tryDeleteURI,
+				cache: false,
+				error: errorCallback,
+				success: successCallback,
+				headers: {
+					'X-CSRF-TOKEN': token
+				}
+			});
+	
+			function errorCallback(result) {
+				$.notify({
+					message: errorMsg,
+                    pos: "top-right"
+				}, {
+					status: 'danger',
+					autoHideDelay: 4000
+				});
+			}
+	
+			function successCallback(result) {
+				if (result.success == false) {
+                    bodyTxt = bodyTxtFail;
+
+					if (result.requirementQuantity > 0) {
+						bodyTxt += bodyTxtAdditionalRequirement.format(result.requirementQuantity);
+					}
+
+					if (result.purchaseQuantity > 0) {
+						bodyTxt += bodyTxtAdditionalPurchase.format(result.purchaseQuantity);
+					}
+				}
+				
+				swal({
+						html: true,
+						title: titleTxt,
+						text: bodyTxt,
+						type: (result.success ? "warning" : "error"),
+						showCancelButton: (result.success ? true : false),
+						confirmButtonColor: (result.success ? "#DD6B55" : "#AEDEF4"),
+						confirmButtonText: (result.success ? deleteTxt : confirmTxt),
+						cancelButtonText: cancelTxt,
+						closeOnConfirm: true,
+						closeOnCancel: true
+					},
+	
+					function(isConfirm) {
+						if (result.success && isConfirm) {
+							$.ajax({
+								type: "DELETE",
+								url: urlWithId,
+								headers: {
+									'X-CSRF-TOKEN': token
+								},
+								success: function() {
+									window.location.href = url;
+								}
+							});
+						}
+					}
+				);
+			}
+		}
+        
+		// open the modal in case there are validation errors
+		$(document).ready(function() {
+            var state = [[${state}]];
+
+		    if ($(".error").length > 0) {
+		        if (state == "edit" ){
+		            $('#editCategoryModal').modal("show");
+                } else {
+                    $("#addCategoryButton").click();
+                }
+            }
+
+		    $('#addCategoryModal').on('shown.bs.modal', function () {
+                $(this).find("input")[0].focus();
+            });
+		});
+	/*]]>*/
+	</script>
+</body>
+</html>

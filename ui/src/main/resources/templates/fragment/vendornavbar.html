@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<aside th:fragment="vendornavbar-aside" class="aside">
+		<div class="aside-inner">
+			<nav data-sidebar-anyclick-close="" class="sidebar">
+				<ul class="nav">
+					<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoruser')" th:class="${page == 'vendor.help'} ? 'active' : ''">
+						<a th:href="@{/vendor/help}">
+							<em class="fa fa-question"></em>
+							<span th:text="#{html.navbar.vendor.help}" />
+						</a>
+					</li>
+
+
+					<li class="nav-heading ">
+							<span th:text="#{html.navbar.operations}" />
+					</li>
+
+					<li sec:authorize="!isAuthenticated()">
+						<a th:href="@{/ui/}">
+							<em class="fa fa-sign-in"></em>
+							<span th:text="#{html.navbar.login}" />
+						</a>
+					</li>
+
+					<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoruser')" th:class="${page == 'vendorpurchase'} ? 'active' : ''">
+						<a th:href="@{/vendor/purchase/list}">
+							<em class="fa fa-dollar"></em>
+							<span th:text="#{html.navbar.vendorpurchaselist}" />
+						</a>
+					</li>
+
+					<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoruser')" th:class="${page == 'vendoruser'} ? 'active' : ''">
+						<a th:href="@{/vendor/user/list}">
+							<em class="fa fa-users"></em>
+							<span th:text="#{html.navbar.vendorusers}" />
+						</a>
+					</li>
+
+				</ul>
+			</nav>
+		</div>
+	</aside>
+</body>
+</html>

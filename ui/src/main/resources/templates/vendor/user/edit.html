@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/vendornavbar :: vendornavbar-aside (page = 'vendoruser')" />
+
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 th:if="${vendorUserForm.id}==0" th:text="#{html.vendoruser.addvendoruser}"/>
+						<h3 th:unless="${vendorUserForm.id}==0" th:text="#{html.vendoruser.editvendoruser}"/>
+					</div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<form class="form-horizontal" id="vendorUserForm" th:action="@{/vendor/user/edit}" method="post" th:object="${vendorUserForm}" enctype="multipart/form-data">
+									<input th:field="*{id}" type="hidden"/>
+									<input type="checkbox" id="realAdminField" th:field="*{admin}" class="hidden" />
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.vendoruser.email}"/>
+											<div class="col-sm-8">
+												<input th:field="*{email}" class="form-control" autofocus="autofocus" />
+												<ul th:if="${#fields.hasErrors('email')}" class="error">
+													<li class="error" th:each="err : ${#fields.errors('email')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.vendoruser.administrator}"/>
+											<div class="col-sm-8">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input id="adminCheckbox" class="checkbox" type="checkbox" th:attr="checked=${vendorUserForm.admin}" />
+														<span class="fa fa-check"></span>
+													</label>
+													<ul th:if="${#fields.hasErrors('admin')}" class="error">
+														<li th:each="err : ${#fields.errors('admin')}" th:text="${err}"/>
+													</ul>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset id="purchasesFieldSet">
+										<div class="form-group">
+											<label class="col-sm-2 control-label" th:text="#{html.vendoruser.purchases}"/>
+	
+											<div class="col-sm-8">
+												<select th:field="*{purchaseAnswerIds}" multiple="multiple"
+														style="display:none"></select>
+	
+												<select multiple="multiple" id="fakepurchases">
+													<option th:each="purchaseAnswer : ${organizationPurchaseAnswers}" th:value="${purchaseAnswer.id}"
+															th:text="${purchaseAnswer.purchase.title}"
+															th:selected="${#lists.contains(vendorUserForm.purchaseAnswers, purchaseAnswer)}">
+													</option>
+												</select>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<div class="col-sm-offset-2 col-sm-8">
+												<button type="submit" style="margin-right: 5px;" class="btn btn-lg btn-primary col-xs-2" th:text="#{html.control.button.save}"/>
+												<a th:href="@{/vendor/user/list}" style="margin-right: 5px;" class="btn btn-lg btn-danger col-xs-2" th:text="#{html.control.button.cancel}"/>
+											</div>
+										</div>
+									</fieldset>
+	
+	
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+<div th:replace="fragment/footer :: footer"/>
+	<script th:inline="javascript">
+/*<![CDATA[*/
+	/*[+
+		var urL = [[@{/vendoruser/}]];
+		var vendorUserId = [[${vendorUserForm.id}]];
+	+]*/
+
+	var token = $("meta[name='_csrf']").attr("content");
+	$(document).ready(function () {
+
+        var selectedLabel = /*[[#{html.multiselect.footer.selected}]]*/ "defaultvalue";
+        var unselectedLabel = /*[[#{html.multiselect.footer.notselected}]]*/ "defaultvalue";
+
+        var seletedFooter   = '<div class="footer">' + selectedLabel + '</div>';
+        var unseletedFooter = '<div class="footer">' + unselectedLabel + '</div>';
+
+		$('#fakepurchases').multiSelect({'selectableFooter': unseletedFooter, 'selectionFooter': seletedFooter});
+
+		$('#vendorUserForm').on("submit",function(e) {
+			e.preventDefault(); // cancel the actual submit
+			// submit bypassing the jQuery bound event
+			var $options = $("select#fakepurchases option").filter(":selected").clone();
+			$('#purchaseAnswerIds').empty();
+			$('#purchaseAnswerIds').append($options);
+			$('#purchaseAnswerIds option').attr('selected','selected');
+
+			var form = this;
+			form.submit();
+		});
+
+		$('#adminCheckbox').on("change", function(e) {
+			$('#realAdminField').prop('checked', $('#adminCheckbox').prop('checked') );
+		});
+	});
+/*]]>*/
+</script>
+</body>
+</html>

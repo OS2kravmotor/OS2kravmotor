@@ -1,0 +1,18 @@
+INSERT INTO category (name) VALUES("Sikkerhed og brugerstyring");
+INSERT INTO category (name) VALUES("Logning");
+INSERT INTO category (name) VALUES("Arkivering og statistik");
+INSERT INTO category (name) VALUES("Lovgivning");
+INSERT INTO category (name) VALUES("Ejerskab af løsning og data");
+INSERT INTO category (name) VALUES("Standarder og klassifikationer");
+INSERT INTO category (name) VALUES("Integrationer");
+INSERT INTO category (name) VALUES("Miljøer");
+INSERT INTO category (name) VALUES("Tilgængelighed");
+INSERT INTO category (name) VALUES("SLA");
+INSERT INTO category (name) VALUES("Backup / restore");
+INSERT INTO category (name) VALUES("Rapportering");
+INSERT INTO category (name) VALUES("Databehandleraftale");
+INSERT INTO category (name) VALUES("Certificering af kunde");
+INSERT INTO category (name) VALUES("Kundens involvering");
+INSERT INTO category (name) VALUES("Dokumentation");
+INSERT INTO category (name) VALUES("Anvendelse af autoritative data");
+INSERT INTO category (name) VALUES("Migrering til/fra løsningen");

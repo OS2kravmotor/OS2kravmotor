@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+<div class="wrapper">
+	<header th:replace="fragment/navbar :: navbar-header"/>
+	<aside th:replace="fragment/navbar :: navbar-aside (page = 'index')"/>
+
+	<section>
+		<div class="content-wrapper">
+
+			<div class="panel panel-default">
+				<div class="panel-heading"></div>
+				<div class="panel-body">
+					<div class="row">
+						<div class="col-sm-offset-2 col-sm-8">
+							<h3 th:text="#{html.vendor.login.title}"/>
+						</div>
+					</div>
+	
+					<div class="row">
+						<div class="col-lg-12">
+							<form class="form-horizontal" th:action="@{/vendor/login}" th:object="${loginForm}" method="post">
+								<fieldset>
+									<div class="form-group">
+										<label class="col-sm-2 control-label" th:text="#{html.vendor.login.username}"/>
+										<div class="col-sm-8">
+											<input th:field="*{username}" class="form-control" autofocus="autofocus"/>
+										</div>
+									</div>
+								</fieldset>
+	
+								<fieldset>
+									<div class="form-group">
+										<label class="col-sm-2 control-label" th:text="#{html.vendor.login.password}"/>
+										<div class="col-sm-8">
+											<input type="password" th:field="*{password}" class="form-control"/>
+											<a th:href="@{/vendor/user/requestnewpassword}">
+												<th:block th:text="#{html.vendor.login.requestnewpassword}"></th:block>
+											</a>
+										</div>
+									</div>
+								</fieldset>
+	
+								<fieldset>
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-8">
+											<button type="submit" style="margin-right: 5px;" class="btn btn-lg btn-primary col-xs-2" th:text="#{html.vendor.login.button}"/>
+										</div>
+									</div>
+								</fieldset>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
+
+<div th:replace="fragment/footer :: footer"/>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+
+		/*[+
+		var errorMsg =  [[#{html.vendor.login.wrongpassword}]];
+		var passwordResetMsg =  [[#{html.vendor.login.passwordreset}]];
+		+]*/
+
+		$("document").ready(function() {
+			if (window.location.href.indexOf("wrongpassword") > 0) {
+				$.notify(errorMsg, {
+					status: 'danger',
+					pos : 'top-right'
+				});
+			}
+			if (window.location.href.indexOf("passwordreset") > 0) {
+				$.notify(passwordResetMsg, {
+					status: 'success',
+					pos : 'top-right'
+				});
+			}
+		});
+		
+	/*]]>*/
+
+</script>
+</body>
+</html>

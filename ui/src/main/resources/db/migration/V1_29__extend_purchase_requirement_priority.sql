@@ -1,0 +1,1 @@
+ALTER TABLE purchase ADD COLUMN requirement_priority_enabled BOOLEAN NOT NULL DEFAULT true;

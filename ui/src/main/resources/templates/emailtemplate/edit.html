@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'mailtemplates')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<h3 th:text="#{html.email_template.edit.headline}" />
+
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+
+					<div class="panel-body">
+						<div class="row" style="margin-bottom: 30px;">
+							<div class="col-lg-10 col-lg-offset-1">
+								<h3 style="margin-top: 0px;" th:text="#{html.email_template.header}"/>
+								<p th:text="#{html.email_template.intro}"/>
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="col-lg-12">
+								<form class="form-horizontal">
+									<div class="form-group">
+										<label class="col-sm-2 control-label" th:text="#{html.entity.email_template.template}"/>
+
+										<div class="col-sm-8">
+											<select class="form-control m-b col-sm-8" id="templateDropdown">
+												<option th:each="template : ${templates}" th:value="${template.id}" th:text="#{__${template.templateTypeText}__}" th:attr="data-template=${template.emailTemplateType}"/>
+											</select>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-lg-12">
+								<form th:each="template : ${templates}" class="form-horizontal templateForm" th:id="'template' + ${template.id}" style="display: none;">
+									<input type="hidden" name="id" th:value="${template.id}"/>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" th:text="#{html.entity.email_template.title}"/>
+										<div class="col-sm-8">
+											<input name="title" th:value="${template.title}" th:maxlength="50" class="form-control" />
+										</div>
+									</div>
+
+									<div class="form-group">
+										<label class="col-sm-2 control-label" th:text="#{html.entity.email_template.message}"/>
+										<div class="col-sm-8">
+											<textarea name="message" th:text="${template.message}" class="mb-0 preformat" rows="10" style="width:100%;"></textarea>
+										</div>
+									</div>
+
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-10">
+											<button type="button" style="margin-right: 5px;" class="btn btn-lg btn-primary col-xs-2 buttonSubmit" th:text="#{html.control.button.save}"/>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="col-lg-offset-2 col-lg-8">
+								<em th:utext="#{html.email_template.footer}" />
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer"/>
+
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+
+	/*[+
+		var restUrl = [[@{/rest/mailtemplates}]];
+		var msgSuccess = [[#{html.email_template.success}]];
+		var msgFail = [[#{html.email_template.failure}]];
+		
+		var swalImageOk = [[#{html.control.button.confirm}]];
+		var swalImageTitle = [[#{html.email_template.swal.image.title}]];
+		var swalImageText = [[#{html.email_template.swal.image.text}]];
+	+]*/
+	
+		var token = $("meta[name='_csrf']").attr("content");
+
+		$(document).ready(function () {
+			$('#templateDropdown').change(function() {
+				// hide all
+				$('.templateForm').hide();
+				
+				// show chosen
+				$('#template' + $("#templateDropdown").val()).show();
+				
+				//call check template type function
+				checkTemplateType();
+			});
+						
+			$('.buttonSubmit').click(function() {
+				var oForm = $('#template' + $("#templateDropdown").val());
+				var data = getFormData(oForm);
+				
+				save(data, false);
+			});
+			
+			// display currently chosen template
+			$('#template' + $("#templateDropdown").val()).show();
+			
+			$('textarea[name="message"]').summernote({
+				"height": 320,
+				"toolbar": [
+					[ "font", [ "bold", "italic", "underline" ]],
+					[ "para", [ "ul", "ol" ]],
+					[ "insert", [ "picture", "link" ]]
+				],
+				maximumImageFileSize: 100*1024, // 100 KB
+				callbacks: {
+					onImageUploadError: function(msg) {
+						swal({
+							title: swalImageTitle,
+							text: swalImageText,
+							confirmButtonColor : "#4765a0",
+							confirmButtonText : swalImageOk
+						});
+					}
+				},
+				dialogsInBody: true
+			});
+			
+			//call check template type function
+			checkTemplateType();
+		});
+		
+		function checkTemplateType() {
+			type = $("#templateDropdown").find(':selected').data("template");
+			id = $("#templateDropdown").val();
+			
+			if (type == "ORGUNIT_CHANGES") {
+				$('#delay' + id).hide();
+				$('#recipients' + id).show();
+			}else{
+				$('#delay' + id).show();
+				$('#recipients' + id).hide();
+			}
+		}
+
+		// polyfill for IE11 and endsWith() support
+		if (!String.prototype.endsWith) {
+		    String.prototype.endsWith = function(search, this_len) {
+		        if (this_len === undefined || this_len > this.length) {
+		            this_len = this.length;
+		        }
+		        return this.substring(this_len - search.length, this_len) === search;
+		    };
+		}
+
+		function getFormData(oForm) {
+		    var unindexed_array = oForm.serializeArray();
+		    var indexed_array = {};
+
+		    $.map(unindexed_array, function(n, i){
+		        indexed_array[n['name']] = n['value'];
+		    });
+
+		    return indexed_array;
+		}
+		
+		function save(payload, tryEmail) {
+			$.ajax({
+				method : "POST",
+				url: restUrl + "?tryEmail=" + tryEmail,
+				headers: {
+					"content-type": "application/json",
+					'X-CSRF-TOKEN': token
+				},
+				data: JSON.stringify(payload)
+			}).done(function(data) {
+				if (data != '') {
+					$.notify({
+						message: data
+					}, {
+						status: 'success',
+						autoHideDelay: 2000
+					});
+				}
+				else {				
+					$.notify({
+						message: msgSuccess
+					}, {
+						status: 'success',
+						autoHideDelay: 2000
+					});
+				}
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+				if (jqXHR.status) {
+					$.notify({
+						message: jqXHR.responseText
+					}, {
+						status: 'danger',
+						autoHideDelay: 4000
+					});
+				}
+				else {
+					$.notify({
+						message: msgFail
+					}, {
+						status: 'danger',
+						autoHideDelay: 4000
+					});
+				}
+			});
+		}
+		
+	/*]]>*/
+	</script>
+</body>
+</html>

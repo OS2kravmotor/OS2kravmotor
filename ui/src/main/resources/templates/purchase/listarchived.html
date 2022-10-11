@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'purchases.archive')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>	
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="table-responsive">
+									<table class="listTable table table-striped table-hover">
+										<thead>
+											<tr>
+												<th class="col-md-5" th:text="#{html.purchase.title}"/>
+												<th class="col-md-2" th:text="#{html.purchase.status}"/>
+												<th class="col-md-2" th:text="#{html.purchase.starttime}"/>
+												<th class="col-md-2" th:text="#{html.purchase.endtime}"/>
+												<th class="col-md-1" th:text="#{html.header.operation}"/>
+											</tr>
+										</thead>
+	
+										<tbody>
+											<tr th:each="purchase : ${purchases}">
+												<td th:text="${purchase.title}"/>
+												<td>
+													<span th:text="#{__${T(dk.digitalidentity.re.dao.model.enums.Status).valueOf(purchase.status).value}__}"></span>
+													<div class="inline" th:if="${purchase.isDone() and !purchase.hasWinner()}">
+														<span th:text="#{html.purchase.list.no.winner}" ></span>
+														<i class="fa fa-exclamation-circle text-danger" aria-hidden="true"></i>
+													</div>
+												</td>
+												<td th:text="${purchase.startTime} ? ${#dates.format(purchase.startTime, 'yyyy/MM/dd - HH:mm')}"/>
+												<td th:text="${purchase.endTime} ? ${#dates.format(purchase.endTime, 'yyyy/MM/dd - HH:mm')}"/>
+												<td>
+													<a th:href="@{/purchase/edit/} + ${purchase.id}" ><em class="fa fa-fw fa-pencil" th:title="#{html.mouseover.edit}"></em></a>
+													<a th:href="@{/purchase/view/} + ${purchase.id}" ><em class="fa fa-fw fa-search" th:title="#{html.mouseover.view}"></em></a>
+													<a th:href="@{/purchase/download/all/pdf/} + ${purchase.id}"><em class="fa fa-fw fa-file-pdf-o" th:title="#{html.mouseover.pdf}"></em></a>
+													<a th:href="@{/purchase/download/requirements/excel/} + ${purchase.id}" target="_blank"><em class="fa fa-fw fa-file-excel-o" th:title="#{html.mouseover.excel}"></em></a>
+													<a sec:authorize="hasRole('ROLE_http://kravmotoren.dk/admin')" onclick="deletePurchase(this);" href="#" th:attr="data-id=${purchase.id}"><em class="fa fa-fw fa-remove" th:title="#{html.mouseover.delete}"></em></a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+<div th:replace="fragment/footer :: footer"/>
+
+<script th:replace="fragment/datatables :: datatables "/>
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+		var token = $("meta[name='_csrf']").attr("content");
+
+		function deletePurchase(obj) {
+			var id = $(obj).data('id');
+
+			/*[+
+			var deleteURI = [[@{/purchase/}]] + id
+			var url = [[@{/purchase/listarchived}]];
+			var urlWithId = [[@{/purchase/}]] + id;
+			var titleTxt = [[#{html.purchase.list.delete.confirm.title}]];
+			var bodyTxt = [[#{html.purchase.list.delete.confirm.body}]];
+			var cancelTxt = [[#{html.control.button.no}]];
+			var deleteTxt = [[#{html.control.button.yes}]];
+			var errorMsg = [[#{html.domain.list.errormsg}]];
+			+]*/
+
+			swal({
+				html: true,
+				title : titleTxt,
+				text : bodyTxt,
+				type: "warning",
+				showCancelButton: true,
+				confirmButtonColor: "#DD6B55",// : "#AEDEF4"),
+				confirmButtonText: deleteTxt,
+				cancelButtonText: cancelTxt,
+				closeOnConfirm : true,
+				closeOnCancel : true
+			},
+			function (isConfirm) {
+				if (isConfirm) {
+					$.ajax({
+						type: "DELETE",
+						url: deleteURI,
+						headers: {
+							'X-CSRF-TOKEN': token
+						},
+						success: function() {
+							window.location.href = url;
+						},
+						error: function() {
+							$.notify({
+								message: errorMsg
+							},{
+								status: 'danger',
+								autoHideDelay: 4000
+							});
+						}
+					});
+				}
+			});
+		}
+
+	/*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+	<header th:fragment="navbar-header" class="topnavbar-wrapper">
+		<nav role="navigation" class="navbar topnavbar">
+			<div class="navbar-header">
+				<a th:href="@{/logo}" class="navbar-brand">
+					<div class="brand-logo" style="height:100%">
+						<img th:src="@{/img/logo.png}" alt="Kravmotoren Logo" class="img-responsive" style="height:100%"/>
+					</div>
+					<div class="brand-logo-collapsed">
+						&nbsp;
+					</div>
+				</a>
+			</div>
+
+			<div class="nav-wrapper">
+				<ul class="nav navbar-nav navbar-right" sec:authorize="isAuthenticated()">
+					<li class="dropdown dropdown-list">
+					 <a href="#" data-toggle="dropdown" id="username-toggle">
+						<em class="icon-user"></em>
+						<span id="username" class="username" th:text="${#authentication.getPrincipal() + ((session != null AND session.name != null) ? (' (' + session.name + ')') : '')}"/>
+					 </a>
+
+					 <ul class="dropdown-menu">
+						<li>
+							<div class="list-group">
+								<div class="list-group-item">
+									<span th:text="#{html.navbar.roles}"></span>
+									<ul class="whoami" style="padding-left: 0px;">
+										<li class="role" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/admin')" th:text="#{html.role.admin}" />
+										<li class="role" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/purchaser')" th:text="#{html.role.purchaser}" />
+										<li class="role" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/editor')" th:text="#{html.role.editor}" />
+										<li class="role" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/globaleditor')" th:text="#{html.role.globaleditor}" />
+										<li class="role" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoradministrator')" th:text="#{html.role.vendoradministrator}" />
+										<li class="role" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendor')" th:text="#{html.role.vendor}" />
+										<li class="role" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoruser')" th:text="#{html.role.vendor}" />
+									</ul>
+								</div>
+								<div class="list-group-item">
+									<span th:text="#{html.navbar.context}"></span>
+									<ul id="communitiesList" style="list-style: none; padding-left: 0px;"></ul>
+								</div>
+
+								<a sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendoruser')" th:href="@{/vendor/user/changepassword}" class="list-group-item">
+									<div class="media-box">
+										<div class="pull-left">
+											<em class="fa fa-key fa-2x"></em>
+										</div>
+										<div class="media-box-body clearfix">
+											<p th:text="#{html.navbar.changepassword}" class="m0"></p>
+										</div>
+									</div>
+								</a>
+
+								<a th:href="@{/saml/logout}" class="list-group-item">
+									<div class="media-box">
+										<div class="pull-left">
+										   <em class="fa fa-sign-out fa-2x"></em>
+										</div>
+										<div class="media-box-body clearfix">
+										   <p th:text="#{html.navbar.logout}" class="m0"></p>
+										</div>
+									</div>
+								</a>
+							</div>
+						</li>
+					 </ul>
+				  </li>
+				</ul>
+			</div>
+		</nav>
+	</header>
+
+	<aside th:fragment="navbar-aside" class="aside">
+		<div class="aside-inner">
+			<nav data-sidebar-anyclick-close="" class="sidebar">
+				<ul class="nav">
+					<li class="nav-heading" sec:authorize="isAuthenticated()">
+						<span th:text="#{html.navbar.engine}"></span>
+					</li>
+					
+					<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendor')" th:class="${page == 'vendor'} ? 'active' : ''">
+						<a th:href="@{/vendor}">
+							<em class="fa fa-pencil"></em>
+							<span th:text="#{html.navbar.vendor}"></span>
+						</a>
+					</li>
+
+					<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/vendor')" th:class="${page == 'vendor.help'} ? 'active' : ''">
+						<a th:href="@{/vendor/help}">
+							<em class="fa fa-question"></em>
+							<span th:text="#{html.navbar.vendor.help}"></span>
+						</a>
+					</li>
+
+					<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/purchaser')">					
+						<a href="#purchases" data-toggle="collapse">
+							<em class="fa fa-dollar"></em>
+							<span th:text="#{html.navbar.purchases}"></span>
+						</a>
+						
+						<ul id="purchases" class="nav sidebar-subnav collapse">
+							<li class="sidebar-subnav-header"/>
+							<li th:class="${page == 'purchases'} ? 'active' : ''">
+								<a th:href="@{/purchase/list}">
+									<span th:text="#{html.navbar.purchases.list}"></span>
+								</a>
+							</li>
+							<li th:class="${page == 'purchases.archive'} ? 'active' : ''">
+								<a th:href="@{/purchase/listarchived}">
+									<span th:text="#{html.navbar.purchases.archived}"></span>
+								</a>
+							</li>
+							<li th:class="${page == 'purchases.new'} ? 'active' : ''">
+								<a th:href="@{/purchase/new}" id="newPurchaseLink">
+									<span th:text="#{html.purchase.list.add.label}"></span>
+								</a>
+							</li>							
+						</ul>
+					</li>
+
+					<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/editor') or hasRole('ROLE_http://kravmotoren.dk/globaleditor')">
+						<a href="#requirements" data-toggle="collapse">
+							<em class="fa fa-paragraph"></em>
+							<span th:text="#{html.navbar.requirements}"></span>
+						</a>
+						
+						<ul id="requirements" class="nav sidebar-subnav collapse">
+							<li class="sidebar-subnav-header"/>
+							<li th:class="${page == 'requirements'} ? 'active' : ''">
+								<a th:href="@{/requirement/list}">
+									<span th:text="#{html.navbar.requirements.local}"></span>
+								</a>
+							</li>
+							
+							<th:block th:if="${@securityUtil.isCommunityMember()}">
+							<li th:class="${page == 'requirements.community'} ? 'active' : ''" th:unless="${session != null AND session.name != null}">
+								<a th:href="@{/requirement/listcommunity}">
+									<span th:text="#{html.navbar.requirements.community}"></span>
+								</a>
+							</li>
+							</th:block>
+							
+							<li th:class="${page == 'requirements.shared'} ? 'active' : ''">
+								<a th:href="@{/requirement/listshared}">
+									<span th:text="#{html.navbar.requirements.global}"></span>
+								</a>
+							</li>
+
+							<li th:class="${page == 'requirements.all'} ? 'active' : ''">
+								<a th:href="@{/requirement/listall}">
+									<span th:text="#{html.navbar.requirements.all}"></span>
+								</a>
+							</li>
+							
+							<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/editor') or hasRole('ROLE_http://kravmotoren.dk/globaleditor')" th:class="${page == 'requirements.deleted'} ? 'active' : ''">
+								<a th:href="@{/requirement/listdeleted}">
+									<span th:text="#{html.navbar.requirements.deleted}"></span>
+								</a>
+							</li>
+						</ul>
+					</li>
+
+					<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/editor') or hasRole('ROLE_http://kravmotoren.dk/globaleditor')">
+						<a href="#classifications" data-toggle="collapse">
+							<em class="fa fa-pencil"></em>
+							<span th:text="#{html.navbar.classifications}"></span>
+						</a>
+						
+						<ul id="classifications" class="nav sidebar-subnav collapse">
+							<li class="sidebar-subnav-header"/>
+							<li th:class="${page == 'tags'} ? 'active' : ''">
+								<a th:href="@{/tag/}">
+									<span th:text="#{html.navbar.classifications.tags}"></span>
+								</a>
+							</li>
+							<li th:class="${page == 'categories'} ? 'active' : ''">
+								<a th:href="@{/category/}">
+									<span th:text="#{html.navbar.classifications.categories}"></span>
+								</a>
+							</li>
+							<li th:class="${page == 'domains'} ? 'active' : ''">
+								<a th:href="@{/domain/}">
+									<span th:text="#{html.navbar.classifications.domains}"></span>
+								</a>
+							</li>
+							<li th:class="${page == 'principles'} ? 'active' : ''">
+								<a th:href="@{/principle/}">
+									<span th:text="#{html.navbar.classifications.principles}"></span>
+								</a>
+							</li>
+
+						</ul>
+					</li>
+
+					<th:block sec:authorize="isAuthenticated()">
+						<li class="nav-heading">
+							<span th:text="#{html.navbar.administration}"></span>
+						</li>
+	
+						<th:block sec:authorize="hasRole('ROLE_http://kravmotoren.dk/admin')">
+						<li th:class="${page == 'mailtemplates'} ? 'active' : ''">
+							<a th:href="@{/mailtemplates}">
+								<em class="fa fa-envelope"></em>
+								<span th:text="#{html.navbar.email.template}"></span>
+							</a>
+						</li>
+						</th:block>
+	
+						<li sec:authorize="hasRole('ROLE_http://kravmotoren.dk/admin')" th:class="${page == 'settings'} ? 'active' : ''">
+							<a th:href="@{/setting/}">
+								<em class="fa fa-cog"></em>
+								<span th:text="#{html.navbar.settings}"></span>
+							</a>
+						</li>
+	
+						<th:block sec:authorize="hasRole('ROLE_http://kravmotoren.dk/globaleditor')">
+						<li th:class="${page == 'cms'} ? 'active' : ''">
+							<a th:href="@{/cms/list}">
+								<em class="fa fa-info"></em>
+								<span th:text="#{html.navbar.cms}"></span>
+							</a>
+						</li>
+						</th:block>
+					</th:block>
+
+					<li class="nav-heading ">
+							<span th:text="#{html.navbar.operations}"></span>
+					</li>
+
+					<li sec:authorize="!isAuthenticated()">
+						<a th:href="@{/ui/}">
+							<em class="fa fa-sign-in"></em>
+							<span th:text="#{html.navbar.login}"></span>
+						</a>
+					</li>
+
+					<li>
+						<a th:href="@{/download/requirements}">
+							<em class="fa fa-file-excel-o"></em>
+							<span th:text="#{html.navbar.download}"></span>
+						</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+</body>
+</html>

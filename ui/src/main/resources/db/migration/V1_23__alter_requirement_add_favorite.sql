@@ -1,0 +1,2 @@
+ALTER TABLE requirement ADD COLUMN favorite TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE requirement_extension ADD COLUMN favorite TINYINT(1) NOT NULL DEFAULT 0;

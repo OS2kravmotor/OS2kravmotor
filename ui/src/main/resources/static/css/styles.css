@@ -1,0 +1,62 @@
+ul.whoami li.role {
+	color: #919da8;
+	margin-left: 20px;
+	list-style-type: square;
+}
+
+.ms-container{
+    width: auto;
+}
+
+.ms-container .footer {
+    background: #F5F5F5;
+    color: #000000;
+    text-align: center;
+    font-weight: normal;
+}
+
+.preformat, .wizard > .steps a {
+    white-space: pre-line;
+}
+
+.table > tbody > tr > td > a > em {
+	color: #515253;
+}
+
+.btn-lg {
+	min-width: 120px;
+}
+
+ul.error li {
+	font-weight: bold;
+	color: red;
+}
+label.error {
+	font-weight: bold;
+	color: red;
+}
+
+@media (min-width: 768px) {
+  .modal-xl {
+    width: 80%;
+    max-width: 980px;
+  }
+}
+
+ul.bullets {
+	list-style-type: square !important;
+	margin-left: 30px;
+    margin-right: 60px;
+}
+
+.popover-title {
+    margin-bottom: 0 !important;
+}
+
+.popover {
+    max-width: 500px;
+}
+
+.table > tbody > tr > td > span > a > em {
+	color: #515253;
+}

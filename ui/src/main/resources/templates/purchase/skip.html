@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header" />
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'purchases.new')" />
+
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-sm-12">
+								<h3 th:text="#{html.purchase.questionnaire.skip.title}" />
+								<p th:text="#{html.purchase.questionnaire.skip.description}" />
+							</div>
+						</div>
+	
+						<div class="row">
+							<div class="col-sm-12">
+								<form id="skipQuestionnaire" method="post" th:action="@{/purchase/questionnaire/{purchaseId}/skip(purchaseId=${purchaseId})}" class="form-horizontal">
+									<fieldset>
+										<div class="form-group">
+											<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+												<a class="btn btn-lg btn-block btn-primary" th:href="@{/purchase/questionnaire/{purchaseId}(purchaseId=${purchaseId})}" th:text="#{html.purchase.questionnaire.skip.button.continue.label}" />
+											</div>
+											<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+												<button type="submit" class="btn btn-lg btn-block btn-warning" th:text="#{html.purchase.questionnaire.skip.button.skip.label}" />
+											</div>
+										</div>
+									</fieldset>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer" />
+
+</body>
+</html>

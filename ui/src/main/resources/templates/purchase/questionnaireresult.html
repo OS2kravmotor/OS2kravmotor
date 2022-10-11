@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header" />
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'purchases.new')" />
+
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-sm-12">
+								<h3 th:text="#{html.purchase.questionnaire.result.title(${requirementsChosen})}" />
+							</div>
+						</div>
+	
+						<div class="row">
+							<div class="col-sm-12">
+								<form class="form-horizontal">
+									<fieldset>
+										<div class="form-group">
+											<div class="col-sm-12" th:utext="#{html.purchase.questionnaire.result(${requirementsChosen}, ${requirementsMax})}" />
+										</div>
+									</fieldset>
+	
+									<fieldset>
+										<div class="form-group">
+											<div class="col-sm-12">
+												<a id="okButton" class="btn btn-primary col-xs-3" th:href="@{/purchase/edit/{purchaseId}(purchaseId=${purchaseId})}" th:text="#{html.control.button.confirm}" />
+											</div>
+										</div>
+									</fieldset>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer" />
+
+</body>
+</html>

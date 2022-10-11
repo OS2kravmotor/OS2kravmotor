@@ -1,0 +1,41 @@
+<th:block th:fragment="answerModal" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<div class="modal fade" id="answerModal" role="dialog">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+			        <h5 class="modal-title" th:text="#{html.purchase.answer.modal.header}"></h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			    </div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label class="control-label" th:text="#{html.purchase.answer.modal.status}"/>
+						<select id="status" class="form-control" autofocus="autofocus" onchange="modalService.selectListener(this.selectedIndex)" >
+	                        <option
+	                                th:each="status : ${T(dk.digitalidentity.re.dao.model.enums.CustomerAnswer).values()}"
+	                                th:value="${status}"
+	                                th:text="#{__${status.value}__}"
+	                                th:selected="${answer.customerAnswer==status}"
+	                        />
+	                    </select>
+	                </div>
+                    
+                    <div id="hideModalComment" hidden>
+                    	<br/>
+	                    <div class="form-group">
+							<label class="control-label" th:text="#{html.purchase.answer.modal.comment}"/>
+							<textarea rows="5" class="form-control" id="modalComment">[[${answer.customerComment}]]</textarea>
+						</div>
+					</div>
+					
+					<br/>
+					<div>
+						<button th:onclick="'javascript:modalService.save(' + ${answer.id} + ')'" class="btn btn-primary" style="margin-right:20px;">Gem</a>
+						<button data-dismiss="modal" class="btn btn-danger">Annuller</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</th:block>

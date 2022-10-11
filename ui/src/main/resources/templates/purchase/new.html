@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'purchases.new')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<form class="form-horizontal" method="post" th:action="@{/purchase/new}" th:object="${newPurchase}">
+									<input type="hidden" th:field="*{requirementPriorityEnabled}"/>
+
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.title} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.title}"></em>
+											</label>
+											<div class="col-sm-8">
+												<input autofocus="autofocus" th:field="*{title}" class="form-control"/>
+												<ul th:if="${#fields.hasErrors('title')}" class="error">
+													<li th:each="err : ${#fields.errors('title')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+			
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.description} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.description}"></em>
+											</label>
+											<div class="col-sm-8">
+												<textarea rows="8" th:field="*{description}" class="form-control"/>
+												<ul th:if="${#fields.hasErrors('description')}" class="error">
+													<li th:each="err : ${#fields.errors('description')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.email} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.email}"></em>
+											</label>
+											<div class="col-sm-8">
+												<input th:field="*{email}" class="form-control"/>
+												<ul th:if="${#fields.hasErrors('email')}" class="error">
+													<li th:each="err : ${#fields.errors('email')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+	
+									<fieldset id="domainsFieldSet">
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.domain} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.domain}"></em>
+											</label>
+											<div class="col-sm-8">
+												<select th:field="*{domains}" multiple="multiple" id="my-select" name="my-select[]">
+													<option th:each="domain : ${domains}" th:value="${domain.id}" th:text="${domain.name}" selected="selected"></option>
+												</select>
+												<ul th:if="${#fields.hasErrors('domains')}" class="error">
+													<li th:each="err : ${#fields.errors('domains')}" th:text="${err}"/>
+												</ul>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<div class="form-group">
+											<label class="col-sm-2 control-label">
+												<span th:text="#{html.purchase.requirementPriorityEnabled} + ' *'"></span>
+												<em class="fa fa-fw fa-question" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" th:attr="data-content=#{html.helptext.purchase.requirementPriorityEnabled}"></em>
+											</label>
+											<div class="col-sm-8">
+												<div class="checkbox c-checkbox">
+													<label>
+														<input type="checkbox" id="requirementPriorityEnabledFormField" th:checked="*{requirementPriorityEnabled}" />
+														<span class="fa fa-check"></span>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+									
+									<fieldset>
+										<div class="form-group">
+											<div class="col-sm-offset-2 col-sm-8">
+												<button type="submit" style="margin-right: 5px;" class="btn btn-lg btn-primary col-xs-2" th:text="#{html.control.button.save}"/>
+												<a th:href="@{/purchase/list}" style="margin-right: 5px;" class="btn btn-lg btn-danger col-xs-2" th:text="#{html.control.button.cancel}"/>
+											</div>
+										</div>
+									</fieldset>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer"/>
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+		$(document).ready(function () {
+
+			var selectedLabel = /*[[#{html.multiselect.footer.selected}]]*/ "defaultvalue";
+			var unselectedLabel = /*[[#{html.multiselect.footer.notselected}]]*/ "defaultvalue";
+
+			var seletedFooter   = '<div class="footer">' + selectedLabel + '</div>';
+			var unseletedFooter = '<div class="footer">' + unselectedLabel + '</div>';
+
+			$('[data-toggle="popover"]').popover();
+
+			$('#my-select').multiSelect({'selectableFooter': unseletedFooter, 'selectionFooter': seletedFooter});
+
+			function handleOnChangeEvent(){
+				$('#realAvailableForAllDomains').val(0);
+				$('#domainsFieldSet').removeAttr("disabled");
+				$('#my-select').removeAttr("disabled");
+				$("#my-select").multiSelect('refresh');
+			};
+
+			$("#requirementPriorityEnabledFormField").on("change", function() {
+				$("#requirementPriorityEnabled").val($("#requirementPriorityEnabledFormField").prop("checked"));
+			});
+			
+			//in case of page refresh
+			handleOnChangeEvent();
+		});
+
+		/*]]>*/
+	</script>
+
+
+	<script th:replace="fragment/datatables :: datatables "/>
+
+</body>
+</html>

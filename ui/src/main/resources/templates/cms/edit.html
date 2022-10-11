@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'cms')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<h3 th:text="#{html.cms.edit.headline}" />
+
+				<div class="panel panel-default">
+					<div class="panel-heading" />
+
+					<div class="panel-body">
+						<div class="row" style="margin-bottom: 30px;">
+							<div class="col-lg-10 col-lg-offset-1">
+								<h3 style="margin-top: 0px;" th:text="#{html.cms.edit.header}"/>
+								<span th:text="#{html.cms.edit.subheader}"></span>
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="col-lg-8 col-lg-offset-1 col-md-12 col-sm-12">
+								<form action="#" th:action="@{/cms/edit}" th:object="${cmsMessage}" method="post">
+									<input th:field="*{key}" style="display: none">
+									<textarea id="content" class="form-control" th:field="*{value}" autocomplete="off"></textarea>
+									
+									<br/>
+
+									<button type="submit" class="btn btn-lg btn-primary m-b" th:text="#{html.control.button.save}"></button>
+									<a th:href="@{/cms/list}" class="btn btn-lg btn-danger m-b" th:text="#{html.control.button.cancel}"></a>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer"/>
+
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+
+	/*[+
+	+]*/
+	
+		var token = $("meta[name='_csrf']").attr("content");
+
+		$(document).ready(function() {
+			$('#content').summernote({
+				"height": 320,
+				"toolbar": [
+					[ "font", [ "bold", "italic", "underline" ]],
+					[ "para", [ "ul", "ol", "style" ]]
+				]
+			});
+		});
+		
+	/*]]>*/
+	</script>
+</body>
+</html>

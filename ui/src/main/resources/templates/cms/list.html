@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'cms')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<h3 th:text="#{html.cms.list.headline}" />
+
+				<div class="panel panel-default">
+					<div class="panel-heading" />
+
+					<div class="panel-body">
+						<div class="row" style="margin-bottom: 30px;">
+							<div class="col-lg-12">
+								<h3 style="margin-top: 0px;" th:text="#{html.cms.list.header}"/>
+								<span th:text="#{html.cms.list.subheader}"></span>
+							</div>
+						</div>
+						
+						<div class="row">
+							<div class="col-sm-12">
+								<div class="table-responsive">
+									<table style="padding-right:0px !important;" id="cmsTable" class="table table-striped table-hover" >
+										<thead>
+											<tr>
+												<th class="col-lg-4 col-md-5" th:text="#{html.cms.list.cmstable.key}"></th>
+												<th class="col-lg-7 col-md-6" th:text="#{html.cms.list.cmstable.name}"></th>
+												<th class="col-lg-1 col-md-1" th:text="#{html.cms.list.cmstable.edit}"></th>
+											</tr>
+										</thead>
+
+										<tbody>
+											<tr th:each="cms : ${cmsMessages}">
+												<td th:text="${cms.key}"></td>
+												<td th:text="${cms.name}"></td>
+												<td><a th:href="${'/cms/edit?key=' + cms.key}"><em style="color: #212529" class="fa fa-pencil"></em></a></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer"/>
+
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+
+	/*[+
+	+]*/
+	
+		var token = $("meta[name='_csrf']").attr("content");
+
+		$(document).ready(function () {
+		});
+		
+	/*]]>*/
+	</script>
+</body>
+</html>

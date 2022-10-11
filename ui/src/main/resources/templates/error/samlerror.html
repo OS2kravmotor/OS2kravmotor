@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'none')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-sm-12">
+								<h3 th:text="#{html.default.message.errorsaml}"/>
+							</div>
+						</div>
+	
+						<div class="row">
+							<div class="col-md-12">
+								<p th:if="${cause == 'EXPIRED'}"
+								   th:text="#{html.default.message.saml.expired}"/>
+								<p th:if="${cause == 'SKEW'}" th:text="#{html.default.message.saml.skew}"/>
+								<p th:if="${cause == 'RESPONDER'}"
+								   th:text="#{html.default.message.saml.responder}"/>
+								<p th:if="${cause == 'UNKNOWN'}"
+								   th:text="#{html.default.message.saml.unknown}"/>
+							</div>
+	
+							<div class="col-sm-12">
+								<th:block th:if="${exception != null}">
+									<h4 th:text="#{html.default.message.stacktrace}"/>
+									<pre th:text="${exception}"/>
+								</th:block>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<nav th:replace="fragment/footer :: footer" />
+</body>
+</html>

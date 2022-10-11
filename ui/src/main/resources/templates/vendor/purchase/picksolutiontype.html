@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/vendornavbar :: vendornavbar-aside (page = 'vendorpurchase')" />
+
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 th:text="#{html.vendor.purchase.solutiontype.title}"></h3>
+					</div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<p th:utext="#{html.vendor.purchase.solutiontype.text}"></p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-lg-12">
+								<form id="purchase-form" class="form-horizontal" method="post" th:action="@{/vendor/purchase/solutiontype/{purchaseAnswerId}(purchaseAnswerId=${purchaseAnswer.id})}">
+									<fieldset>
+										<div class="form-group row">
+											<label class="col-md-2 control-label" style="padding-top:0px;" th:text="#{html.vendor.purchase.solutiontype}"></label>
+											<div class="col-md-10">
+												<div class="c-radio" th:each="type : ${T(dk.digitalidentity.re.dao.model.enums.SolutionType).values()}" th:if="${type != T(dk.digitalidentity.re.dao.model.enums.SolutionType).NOT_SET}">
+													<label>
+														<input name="solutionType" type="radio" th:value="${type}"/>
+														<span class="fa fa-circle"></span>
+														<th:block th:text="#{__${type.message}__}"></th:block>
+													</label>
+												</div>
+											</div>
+										</div>
+									</fieldset>
+									<fieldset>
+										<div class="form-group row">
+											<div class="col-md-10 col-md-offset-2">
+												<button type="submit" class="btn btn-primary" th:text="#{html.control.button.save.choice}"></button>
+											</div>
+										</div>
+									</fieldset>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer"/>
+
+	<script th:inline="javascript">
+		$("document").ready(function () {
+			$('input[value="BOTH"]')[0].checked = "checked";
+		});
+	</script>
+</body>
+</html>

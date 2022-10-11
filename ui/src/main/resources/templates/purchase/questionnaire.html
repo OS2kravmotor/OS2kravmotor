@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'purchases.new')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-sm-12">
+								<h3>
+									<span th:text="#{html.purchase.questionnaire.question} + ':'" />
+									<span id="progress" />
+								</h3>
+							</div>
+						</div>
+	
+						<div class="row">
+							<div class="col-xl-4 col-xl-offset-1 col-lg-6 col-lg-offset-1 col-md-8 col-md-offset-2">
+								<form id="answerForm" method="post" th:action="@{/purchase/questionnaire/{purchaseId}(purchaseId=${purchaseId})}" th:object="${questionnaire}" class="form-horizontal">
+									<th:block th:each="tag : ${tags}">
+										<h2 th:text="${tag.question}"></h2>
+										<section>
+											<div class="form-group">
+												<label class="col-xs-2 control-label" th:text="#{html.purchase.questionnaire.question}" />
+												<div class="col-xs-10">
+													<div class="preformat form-control" style="height:auto !important;" th:text="${tag.question}" />
+												</div>
+											</div>
+		
+											<div class="form-group">
+												<label class="col-xs-2 control-label" th:text="#{html.purchase.questionnaire.answer}" />
+												<div class="col-xs-10">
+													<select class="form-control" th:name="|answers[${tag.id}]|">
+														<option th:value="${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).YES}" th:text="#{enum.answerchoice.do_not_know}"></option>
+														<option th:value="${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).YES}" th:text="#{enum.answerchoice.yes}"></option>
+														<option th:value="${T(dk.digitalidentity.re.dao.model.enums.AnswerChoice).NO}" th:text="#{enum.answerchoice.no}"></option>
+													</select>
+												</div>
+											</div>
+										</section>
+									</th:block >
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="fragment/footer :: footer" />
+
+	<script th:replace="fragment/datatables :: datatables " />
+	 
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+		$("document").ready(function() {
+			/*[+
+				var url = [[@{/answer/} + ${purchaseID}]];
+				var cancelTxt = [[#{html.control.button.cancel}]];
+				var confirmTxt = [[#{html.control.button.delete}]];
+				var tagsCount = [[${#lists.size(tags)}]];
+				var nextLabel = [[#{html.control.button.next}]];
+				var prevLabel = [[#{html.control.button.prev}]];
+				var finishLabel = [[#{html.control.button.finish}]];
+			+]*/
+			
+			function setProgressBar(index){
+				$("#progress").text(index + "/"+ tagsCount);
+			}
+			setProgressBar(1);
+
+			var form = $("#answerForm").show();
+
+			form.steps({
+				headerTag: "h2",
+				bodyTag: "section",
+				transitionEffect: "slideLeft",
+				onStepChanging: function (event, currentIndex, newIndex)
+				{
+					setProgressBar(newIndex+1);
+
+					return true;
+				},
+				onFinished: function (event, currentIndex)
+				{
+					form.submit();
+				},
+			    labels: {
+			        finish: finishLabel,
+			        next: nextLabel,
+			        previous: prevLabel
+			    }
+			});
+			
+			//hide tabs
+			$('ul[role="tablist"]').hide();
+		});
+
+		/*]]>*/
+	</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'requirements.all')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default">
+					<div class="panel-heading"></div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<label class="control-label" style="margin-top: 10px;">Søg</label>
+								<input class="form-control" id='requirementTreeSearchField' autofocus="autofocus" style="margin-bottom: 40px;" />
+								<div th:id='requirementTreeHierarchy'></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	
+	<style>
+		.handleIcons {
+			display: none;
+			margin-left: 10px;
+		}
+		
+		.badge-label {
+			margin-left: 5px;
+		}
+	</style>
+	
+	<nav th:replace="fragment/footer :: footer" />
+
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+		/*[+
+            	var data = [[${data}]];
+				var url = [[@{/requirement/listall}]];
+				var urlWithId = [[@{/requirement/}]];
+				var titleTxt = [[#{html.requirement.list.delete.confirm.title}]];
+				var bodyTxt = [[#{html.requirement.list.delete.confirm.body}]];
+				var cancelTxt = [[#{html.control.button.no}]];
+				var confirmTxt = [[#{html.control.button.yes}]];
+		+]*/
+		
+		var token = $("meta[name='_csrf']").attr("content");
+		var treeService;
+		$(document).ready(function() {		
+			treeService = new TreeService();
+			treeService.init();
+		});
+		
+		function TreeService() {
+			this.init = function() {
+				$('#requirementTreeHierarchy').jstree('destroy');
+				
+				var config = {
+		                "core": {
+		                    "data": data,
+		                    "themes": {
+		                        "icons": false
+		                    }
+		                },
+		                "search" : {
+		                    "show_only_matches": true,
+		                    "search_callback": function(str, node) {
+		                        return (node.text.toUpperCase().startsWith(str.toUpperCase()));
+		                    }
+		                },
+	                    "plugins" : [
+	                        "wholerow", "search"
+	                    ]
+	                };
+	            
+	            // Init OrgUnitTree
+				$('#requirementTreeHierarchy').jstree(config);
+	            
+	            // searching in the JSTree
+	            var to = false;
+	            $('#requirementTreeSearchField').keyup(function() {
+	                if (to) {
+	                    clearTimeout(to);
+	                }
+
+	                to = setTimeout(function() {
+	                    var v = $('#requirementTreeSearchField').val();
+
+	                    $('#requirementTreeHierarchy').jstree(true).search(v);
+	                }, 400);
+	            });
+	            
+	            //listeners
+	            $("#requirementTreeHierarchy").on("select_node.jstree", function(e, data) {
+	            	$("#requirementTreeHierarchy").jstree().deselect_all(true);
+	            	
+				});
+	            $("#requirementTreeHierarchy").on("hover_node.jstree", function(e, data) {
+	            	$("#" + data.node.id + " .handleIcons").show();
+				});
+	            $("#requirementTreeHierarchy").on("dehover_node.jstree", function(e, data) {
+	            	$(".handleIcons").hide();
+				});
+			}
+			
+			this.deleteRequirement = function(id) {
+				swal({
+						html: true,
+						title: titleTxt,
+						text : bodyTxt,
+						type : "warning",
+						showCancelButton : true,
+						confirmButtonColor : "#DD6B55",
+						confirmButtonText : confirmTxt,
+						cancelButtonText : cancelTxt,
+						closeOnConfirm : true,
+						closeOnCancel : true
+					},
+					function(isConfirm) {
+						if (isConfirm) {
+							$.ajax({
+								type: "DELETE",
+								url: urlWithId + id,
+								headers: {
+									'X-CSRF-TOKEN': token
+								},
+								success: function() {
+									window.location.href = url;
+								}
+							});
+						}
+					}
+				);
+			}
+			
+			this.edit = function(id) {
+				window.location.href = "/requirement/edit/" + id;
+			}
+			
+			this.view = function(id) {
+				window.location.href = "/requirement/view/" + id;
+			}
+			
+			
+			
+		}
+	/*]]>*/
+	</script>
+</body>
+</html>

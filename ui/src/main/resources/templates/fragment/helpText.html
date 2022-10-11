@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="dk" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div th:fragment="helpText">
+		<h4>Overordnet</h4>
+		<p>Kravet skal formuleres så det kort og præcist beskriver det krav som stilles til leverandøren. Dvs. at kravet skal falde ind i præcis én kravkategori, og ikke kunne opsplittes i flere selvstændige krav.</p>
+
+		<h4>Retningslinjer</h4>
+		<ul class="bullets">
+			<li><b>Konsistens</b>. Kravteksten skal bruge betegnelsen "kommunen" om den indkøbende kommune, og ikke kommunens navn og/eller andre betegnelser som "kunden", "indkøberen" eller lignende.</li>
+			<li><b>Konsistens</b>. Kravteksten skal bruge betegnelsen "løsningen" om det it-system der skal indkøbes.</li>
+			<li><b>Konsistens</b>. Samme ord for tværgående begreber bør bruges i alle krav, fx anvendes GDPR som angivelse for eudatabeskyttelsesforordningen. Det anbefales, at man gør sig bekendt med begreber, der anvendes i eksisterende krav.</li>
+			<li><b>Ikke-overlappende</b>. Krav bør så vidt muligt ikke overlappe hinanden.</li>
+			<li><b>System-uafhængigt</b>. Kravteksten skal ikke referere til det ønskede system ved navn, eller til andre systemer ved navn med mindre, der er tale om nationale løsninger. Fx angives 'ESDH-system' i stedet for 'Formpipe Acadre', og 'Kommunens EOJ løsning' i stedet for 'KMD Nexus'. Dette sikrer, at kravteksten kan genbruges af andre kommuner. Nationale løsninger som patientindeks, fælles medicinkort, DFDG m.m. angives ved navns nævnelse.</li>
+			<li><b>Vurderingsmuligt</b>. Kravet skal formuleres, så leverandørens besvarelse kan vurderes, dvs. kravet skal så vidt muligt formuleres, så man efterfølgende kan holde leverandørens besvarelse op mod kravet.</li>
+		</ul>
+
+
+		<h4>Form</h4>
+		<p>Formuleringen af kravteksten bør følge nedenstående opbygning</p>
+
+		<ul class="bullets">
+			<li><b>Krav</b>. Kort kravtekst der forklarer, hvad vi ønsker.</li>
+			<li><b>Rationale</b>. Kort tekst, der angiver vores rationale for at stille kravet.</li>
+			<li><b>Konsekvens ved afgivelse</b>. Den konsekvens det vil have for os, hvis kravet ikke indfries.</li>
+		</ul>
+		
+		<h4>Eksempel</h4>
+		<p><b>Løsningen skal understøtte fødereret adgangsstyring</b></p>
+
+		<p>Den fælleskommunale rammearkitekturs byggeblokke for sikkerhed baserer sig på fødereret adgangsstyring, og KOMBITs støttesystemer til samme, er en konkret implementation af denne strategi.</p>
+
+		<p>Løsningen skal støtte op om denne strategi, ved at understøtte, at brugere oprettes og tildeles rettigheder i kommunens centrale rettighedsstyringssystem, eller ved at rettigheder tildeles via KOMBITs støttesystemer.</p>
+
+		<p>Løsningen må derfor ikke kræve, at brugere skal oprettes manuelt i løsningen, eller at tildelingen af rettigheder til brugere skal foregå inde i løsningen. Løsningen må dog gerne tilbyde funktionalitet til intern brugerstyring, så længe den også understøtter fødereret brugerstyring.</p>
+
+		<p>Løsningen skal understøtte SAML 2.0 eller WS-Federation som føderationsteknologi, da dette er kompatibelt med den brugerstyringsløsning, som kommunen anvender, samt den teknologi som KOMBITs støttesystemer anvender.</p>
+
+		<p>Hvis kravet ikke opfyldes, vil det introducere unødige arbejdsgange, og øge omkostningerne til brugerstyring i kommunen.</p>
+	</div>
+</body>
+</html>

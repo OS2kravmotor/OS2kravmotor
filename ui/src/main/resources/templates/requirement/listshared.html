@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragment/header :: header"/>
+<body>
+
+	<div class="wrapper">
+		<header th:replace="fragment/navbar :: navbar-header" />
+		<aside th:replace="fragment/navbar :: navbar-aside (page = 'requirements.shared')" />
+ 
+		<section>
+			<div class="content-wrapper">
+				<div class="panel panel-default" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/globaleditor')" th:unless="${tobepromoted.isEmpty()}" >
+					<div class="panel-heading">
+						<h3 th:text="#{html.requirement.page.list.pendingpromotion}"/>
+					</div>
+					<div class="panel-body">
+						<div class="row" sec:authorize="hasRole('ROLE_http://kravmotoren.dk/globaleditor')" th:unless="${tobepromoted.isEmpty()}">
+							<div class="col-lg-12">
+								<div class="table-responsive">
+									<table id="toBePromotedTable" class="listTable table table-striped table-hover">
+										<thead>
+											<tr>
+												<th class="col-md-3" th:text="#{html.requirement.name}"/>
+												<th class="col-md-1" th:text="#{html.requirement.category}"/>
+												<th class="col-md-7" th:text="#{html.requirement.description}"/>
+												<th class="col-md-1" th:text="#{html.header.operation}"/>
+											</tr>
+										</thead>
+			
+										<tbody>
+											<tr th:each="requirement : ${tobepromoted}">
+												<td th:text="${requirement.name}"/>
+												<td th:text="${requirement.categoryRichObject?.name}"/>
+												<td class="preformat" th:text="${requirement.description}"/>
+												<td>
+													<a href="#" onclick="promote(this);" th:attr="data-id=${requirement.id}" th:if="${requirement.requestedToBeShared}"><em class="fa fa-fw fa-thumbs-o-up" th:title="#{html.mouseover.accept}"></em></a>
+													<a href="#" onclick="reject(this);" th:attr="data-id=${requirement.id}" th:if="${requirement.requestedToBeShared}"><em class="fa fa-fw fa-thumbs-o-down" th:title="#{html.mouseover.reject}"></em></a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 th:text="#{html.requirement.page.list.global}" />
+					</div>
+					<div class="panel-body">
+						<div class="row">
+							<div class="col-lg-12">
+								<div class="table-responsive">
+									<table id="sharedTable" class="listTable table table-striped table-hover">
+										<thead>
+											<tr>
+												<th class="col-md-3" th:text="#{html.requirement.name}"/>
+												<th class="col-md-1" th:text="#{html.requirement.category}"/>
+												<th class="col-md-7" th:text="#{html.requirement.description}"/>
+												<th class="col-md-1" th:text="#{html.header.operation}"/>
+											</tr>
+										</thead>
+			
+										<tbody>
+											<tr th:each="requirement : ${requirements}">
+												<td>
+													<span th:text="${requirement.name}" />
+													<span style="display:none;" th:text="${requirement.id}" />
+													<em th:if="${requirement.extDisable}" class="fa fa-fw fa-exclamation-circle text-danger" data-container="body" data-toggle="popover" data-trigger="focus" tabindex="-1" data-placement="right" data-title="Fravalgt krav" th:attr="data-content=${requirement.extDisableReason}"></em>
+												</td>
+												<td th:text="${requirement.categoryRichObject?.name}"/>
+												<td class="preformat" th:text="${requirement.description}"/>
+												<td>
+													<a th:href="@{/requirement/view/{id}(id=${requirement.id})}"><em class="fa fa-fw fa-search"></em></a>
+													<a th:href="@{/requirement/edit/{id}(id=${requirement.id})}"><em class="fa fa-fw fa-pencil"></em></a>
+													<a sec:authorize="hasRole('ROLE_http://kravmotoren.dk/globaleditor')" href="#" onclick="deleteRequirement(this);" th:attr="data-id=${requirement.id}"><em class="fa fa-fw fa-remove"></em></a>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<style>
+		/* custom ovveride of sweetalert imput error. we use custom input so this "X" looks odd */
+		body > div.sweet-alert.showSweetAlert.visible > fieldset > div.sa-input-error {
+			display: none !important;
+		}
+		textarea#text {
+			max-width:100%;
+			min-width: 100%;
+		}
+	</style>
+	
+	<nav th:replace="fragment/footer :: footer" />
+	<script th:replace="fragment/datatables :: datatables "/>
+
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+		var token = $("meta[name='_csrf']").attr("content");
+
+		function promote(obj) {			
+			/*[+
+				var urL = [[@{/requirement/}]];
+				var promoteTitle = [[#{html.requirement.page.list.promote.title}]];
+				var promoteText = [[#{html.requirement.page.list.promote.text}]];
+				var promoteSuccessTitle = [[#{html.requirement.page.list.promote.success.title}]];
+				var promoteErrorTitle = [[#{html.requirement.page.list.promote.error.title}]];
+				var confirmButtonText = [[#{html.control.button.yes}]];
+				var cancelButtonText = [[#{html.control.button.no}]];
+			+]*/
+			
+			var requirementId = $(obj).data('id');
+
+			swal({
+					title: promoteTitle,
+					text: promoteText,
+					type: 'info',
+					showCancelButton: true,
+					confirmButtonColor: '#3085d6',
+					cancelButtonColor: '#d33',
+					confirmButtonText: confirmButtonText,
+					cancelButtonText : cancelButtonText,
+					closeOnConfirm: false
+				},
+				function(isConfirm) {
+					if (isConfirm) {
+						$.ajax({
+							method: "POST",
+							url: urL + "promote/" + requirementId,
+							headers: {
+								'X-CSRF-TOKEN': token
+							},
+							success: function(response) {
+								swal({title: promoteSuccessTitle, type: "success" }, function () { location.reload(); });
+							},
+							error: function(response) {
+								swal({title: promoteErrorTitle, type: "error" }, function () { location.reload(); });
+							}
+						});
+					}
+				}
+			);
+		}
+
+		function reject(obj) {
+			/*[+
+			var urL = [[@{/requirement/}]];
+			var rejectTitle = [[#{html.requirement.page.list.reject.title}]];
+			var rejectText = [[#{html.requirement.page.list.reject.text}]];
+			var rejectSuccessTitle = [[#{html.requirement.page.list.reject.success.title}]];
+			var rejectErrorTitle = [[#{html.requirement.page.list.reject.error.title}]];
+			var rejectErrorReason = [[#{html.requirement.page.list.reject.error.reason}]];
+			var confirmButtonText = [[#{html.control.button.yes}]];
+			var cancelButtonText = [[#{html.control.button.no}]];
+			var reasonLabel = [[#{html.requirement.page.list.promoterequest.reason.label}]];
+			+]*/
+		
+			var requirementId = $(obj).data('id');
+			swal({
+				title: rejectTitle,
+				text: rejectText + "<br/><hr/><label>"+reasonLabel+":</label><textarea id='text' class='form-control' rows='5'></textarea>",
+				type: 'error',
+				html: true,
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: confirmButtonText,
+				cancelButtonText : cancelButtonText,
+				closeOnConfirm: false
+			},
+			function(isConfirm){
+				if (isConfirm) {
+					var val = document.getElementById('text').value;
+					if (val) {
+	 					$.ajax({
+							method: "POST",
+							url: urL + "reject/" + requirementId,
+							contentType: 'text/plain',
+							data: val,
+							headers: {
+								'X-CSRF-TOKEN': token
+							},
+							success: function(response) {
+								swal({title: rejectSuccessTitle, type: "success" }, function () { location.reload(); });
+							},
+							error: function(response) {
+								swal({title: rejectErrorTitle, type: "error" }, function () { location.reload(); });
+							}
+						});
+					} else {
+						swal.showInputError(rejectErrorReason);
+						return false
+					}
+				}
+			});
+		}
+
+		function deleteRequirement(obj) {
+			var id = $(obj).data('id');
+
+			/*[+
+			var url = [[@{/requirement/listshared}]];
+			var urlWithId = [[@{/requirement/}]] + id;
+			var titleTxt = [[#{html.requirement.list.delete.confirm.title}]];
+			var bodyTxt = [[#{html.requirement.list.delete.confirm.body}]];
+			var cancelTxt = [[#{html.control.button.cancel}]];
+			var confirmTxt = [[#{html.control.button.delete}]];
+			+]*/
+
+			swal({
+					html: true,
+					title: titleTxt,
+					text : bodyTxt,
+					type : "warning",
+					showCancelButton : true,
+					confirmButtonColor : "#DD6B55",
+					confirmButtonText : confirmTxt,
+					cancelButtonText : cancelTxt,
+					closeOnConfirm : true,
+					closeOnCancel : true
+				},
+				function(isConfirm) {
+					if (isConfirm) {
+						$.ajax({
+							type: "DELETE",
+							url: urlWithId,
+							headers: {
+								'X-CSRF-TOKEN': token
+							},
+							success: function() {
+								window.location.href = url;
+							}
+						});
+					}
+				}
+			);
+		}
+		
+		$(document).ready(function() {
+
+		});
+	/*]]>*/
+</script>
+</body>
+</html>
