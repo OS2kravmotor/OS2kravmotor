@@ -40,8 +40,8 @@ Du udfylder checklisten ved at skrive et x i de tomme [ ] ud for de krav produkt
 | <ul><li> [x] </li> | F9 | Teknisk implementering af løsningen er dokumenteret [Dokumentation af OS2kravmotor]( https://bitbucket.org/os2offdig/os2kravmotor/src/2b01de27747c964fc89b3525b9e609701863a2a4/doc/?at=master)| 1 |
 | <ul><li> [x] </li> | F10 | OS2's kommunikationskanaler anvendes (OS2.eu) | Kommunikation via [produktsiden]( https://os2.eu/produkt/os2kravmotor) på OS2.eu og via løbende udsendelse af nyhedsbreve til kontaktpersoner | 1 |
 | <ul><li> [x] </li> | F11 | OS2's styringsværktøj benyttes (Jira) | [OS2kravmotors Jira]( https://id.atlassian.com/login?continue=https%3A%2F%2Fid.atlassian.com%2Fjoin%2Fuser-access%3Fresource%3Dari%253Acloud%253Ajira%253A%253Asite%252Febe453a9-3e3d-4398-acd5-bffe20db6d7e%26continue%3Dhttps%253A%252F%252Fos2web.atlassian.net%252Fjira%252Fsoftware%252Fc%252Fprojects%252FKRAVMOTOR%252Fboards%252F89&application=jira) | 1 |
-| <ul><li> [ ] </li> | F12 | Der er kun en version af core koden (Master) | Ja, den findes [her](https://github.com/OS2kravmotor/OS2kravmotor) | 2 |
-| <ul><li> [ ] </li> | F13 | Der er udarbejdet præsentationsmateriale af løsningen | Der er ikke en opdateret version på nuværende tidspunkt. Der ligger en video på produktsiden, der fortsat er aktuel, men der kunne være behov for en opdatering | 2 |
+| <ul><li> [x] </li> | F12 | Der er kun en version af core koden (Master) | Ja, den findes [her](https://github.com/OS2kravmotor/OS2kravmotor) | 2 |
+| <ul><li> [x] </li> | F13 | Der er udarbejdet præsentationsmateriale af løsningen | Der er ikke en opdateret version på nuværende tidspunkt. Der ligger en video på produktsiden, der fortsat er aktuel, men der kunne være behov for en opdatering | 2 |
 | <ul><li> [ ] </li> | F14 | Der er udarbejdet kommunikationsmateriale til strategisk niveau | - | 2 |
 | <ul><li> [ ] </li> | F15 | Best practice for implementering i organisationen dokumenteres | - | 2 |
 | <ul><li> [ ] </li> | F16 | Teknisk dokumentation indeholder best practice for kodestandarder i forhold til de anvendte teknologier | Hvor? | 2 |
@@ -64,7 +64,7 @@ Du udfylder checklisten ved at skrive et x i de tomme [ ] ud for de krav produkt
 | --- | --- | --- | --- | --- |
 | <ul><li> [x] </li> | S1 | Produktet har en kobling til [OS2s strategi](https://os2.eu/side/os2-mission-vision) | OS2kravmotor understøtter digitaliseringsarbejdet i det offentlige Danmark ved at være del af den gode leverandørdialog. | 1 |
 | <ul><li> [x] </li> | S2 | Løsningen understøtter innovation og open source | OS2kravmotor understøtter innovation og udvikling af ikke funktionelle krav på tværs af kommuner. OS2kravmotor er et open source produkt | 1 |
-| <ul><li> [ ] </li> | S3 | Produktets (forventelige) kobling til [OS2's mission, vision og strategi]( https://os2.eu/side/os2-mission-vision) er beskrevet | Ikke nedskrevet, men værdien er løsningen findes på [produktsiden]( https://os2.eu/produkt/os2kravmotor) på OS2s hjemmeside | 2 |
+| <ul><li> [x] </li> | S3 | Produktets (forventelige) kobling til [OS2's mission, vision og strategi]( https://os2.eu/side/os2-mission-vision) er beskrevet | Ikke nedskrevet, men værdien er løsningen findes på [produktsiden]( https://os2.eu/produkt/os2kravmotor) på OS2s hjemmeside | 2 |
 | <ul><li> [ ] </li> | S4 | Der er udarbejdet en vision og strategi for produktet | - | 2 |
 | <ul><li> [ ] </li> | S5 | Produktets kobling til og overensstemmelse med OS2's vision og strategi er tilstede og beskrevet | - | 3 |
 
