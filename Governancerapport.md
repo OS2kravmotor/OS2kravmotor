@@ -29,7 +29,7 @@ Du udfylder checklisten ved at skrive et x i de tomme [ ] ud for de krav produkt
 
 |     |  #  | Krav | Henvisning | Niveau | 
 | --- | --- | --- | --- | --- |
-| <ul><li> [x] </li> | F1 | Kildekoden deles | [Bitbucket[(https://bitbucket.org/os2offdig/os2kravmotor/src/master/) | 0 |
+| <ul><li> [x] </li> | F1 | Kildekoden deles | https://github.com/OS2kravmotor/OS2kravmotor | 0 |
 | <ul><li> [x] </li> | F2 | Open Soruce licenskriterier overholdes | MPL 2.0 | 0 |
 | <ul><li> [x] </li> | F3 | Udbudsregler og alm. lovformelighed er overholdt | Historik kan følges på [OS2s hjemmeside]( https://os2.eu/node/647/dokumenter) | 0 |
 | <ul><li> [x] </li> | F4 | Der er tænkt på sikkerheden i løsningen | Adgangsstyring er designet ift. dataindhold (ikke personfølsomme data) og processer ift. godkendelse af krav i OS2kravmotor | 0 |
